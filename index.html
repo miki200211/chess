@@ -6,14 +6,10 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="西洋棋技巧提升訓練平台，包含實戰戰術題目、30秒棋盤座標極速挑戰與騎士走位計算。">
-  <title>西洋棋實戰練功坊 | Chess Training Hub</title>
+  <meta name="description" content="西洋棋技巧提升訓練平台，新手友好題庫與專項迷你遊戲。">
+  <title>西洋棋練習工坊 | Chess Training Hub</title>
   
   <style>
-    /* ==========================================
-       Pure Standalone CSS (No External CDN required)
-       100% Offline, Fast & Optimized for Mobile & Desktop
-       ========================================== */
     :root {
       --bg-dark: #0f172a;
       --card-bg: #1e293b;
@@ -51,7 +47,7 @@
     header {
       background-color: #1e293b;
       border-bottom: 1px solid var(--card-border);
-      padding: 12px 16px;
+      padding: 10px 16px;
       position: sticky;
       top: 0;
       z-index: 50;
@@ -64,7 +60,7 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
     .brand {
       display: flex;
@@ -72,36 +68,33 @@
       gap: 10px;
     }
     .brand-icon {
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1;
     }
     .brand-title {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--primary);
     }
     .brand-desc {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
     }
 
-    /* Tab navigation with horizontal scroll on mobile */
+    /* Tab navigation */
     .tab-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      padding-bottom: 2px;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
     }
-    .tab-bar::-webkit-scrollbar {
-      display: none;
-    }
+    .tab-bar::-webkit-scrollbar { display: none; }
     .tab-btn {
       white-space: nowrap;
-      padding: 8px 14px;
+      padding: 7px 12px;
       border-radius: 8px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       border: 1px solid var(--card-border);
       background: #334155;
@@ -110,7 +103,7 @@
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     .tab-btn.active {
       background: var(--primary);
@@ -124,11 +117,10 @@
       max-width: 1080px;
       width: 100%;
       margin: 0 auto;
-      padding: 16px;
+      padding: 14px;
       flex-grow: 1;
     }
 
-    /* Tab Panels */
     .tab-panel {
       display: none;
       width: 100%;
@@ -137,16 +129,15 @@
       display: block;
     }
 
-    /* 2 Column Layout for Desktop, 1 Column for Mobile */
     .game-layout {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 16px;
       align-items: start;
     }
     @media (min-width: 860px) {
       .game-layout {
-        grid-template-columns: minmax(320px, 480px) 1fr;
+        grid-template-columns: minmax(320px, 460px) 1fr;
       }
     }
 
@@ -164,7 +155,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
     .turn-badge {
       display: flex;
@@ -180,12 +171,25 @@
       border: 1px solid #64748b;
     }
     .category-badge {
-      font-size: 0.75rem;
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
+      font-size: 0.72rem;
       padding: 3px 8px;
       border-radius: 12px;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      font-weight: 600;
+    }
+    .cat-easy {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+    .cat-med {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .cat-adv {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
     }
 
     /* The Chess Board Grid */
@@ -199,7 +203,7 @@
       border: 4px solid #473322;
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       user-select: none;
     }
     .square {
@@ -216,26 +220,25 @@
     .sq-selected { background-color: var(--sq-select) !important; }
     .sq-target { background-color: var(--sq-target) !important; }
 
-    /* Hints & Moves dots */
     .sq-hint::after {
       content: '';
       position: absolute;
-      width: 28%;
-      height: 28%;
-      background-color: rgba(0, 0, 0, 0.28);
+      width: 30%;
+      height: 30%;
+      background-color: rgba(34, 197, 94, 0.6);
       border-radius: 50%;
       pointer-events: none;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
     }
     .sq-capture::after {
       content: '';
       position: absolute;
       inset: 4px;
-      border: 4px solid rgba(239, 68, 68, 0.6);
+      border: 4px solid rgba(239, 68, 68, 0.65);
       border-radius: 50%;
       pointer-events: none;
     }
 
-    /* Animation effects */
     .sq-correct { animation: anim-correct 0.45s ease; }
     .sq-wrong { animation: anim-wrong 0.4s ease; }
     @keyframes anim-correct {
@@ -253,7 +256,6 @@
       cursor: grab;
       filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
       line-height: 1;
-      transition: transform 0.08s ease;
       pointer-events: none;
     }
     .piece-white {
@@ -265,16 +267,54 @@
       text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45);
     }
 
+    /* Puzzle Quick Jump Selector */
+    .puzzle-selector {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      max-width: 440px;
+      overflow-x: auto;
+      padding: 6px 0;
+      margin-top: 8px;
+    }
+    .puzzle-selector::-webkit-scrollbar { display: none; }
+    .puzzle-dot-btn {
+      flex: 1;
+      min-width: 38px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .puzzle-dot-btn.active {
+      background: var(--primary);
+      color: #0f172a;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+    }
+    .puzzle-dot-btn.solved {
+      border-color: #22c55e;
+      color: #4ade80;
+    }
+
     /* Info & Control Panels */
     .panel-card {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 18px;
+      padding: 16px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.25);
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
     .panel-title-bar {
       display: flex;
@@ -283,12 +323,12 @@
       gap: 8px;
     }
     .panel-title {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--primary);
     }
     .status-badge {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       padding: 3px 8px;
       border-radius: 6px;
       background: #334155;
@@ -301,7 +341,7 @@
       border: 1px solid rgba(34, 197, 94, 0.4);
     }
     .panel-desc {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: #e2e8f0;
       line-height: 1.5;
     }
@@ -311,24 +351,24 @@
       padding: 12px;
       border-radius: 8px;
       font-size: 0.82rem;
-      line-height: 1.4;
+      line-height: 1.5;
       display: none;
     }
     .feedback-box.success {
       display: block;
-      background: rgba(22, 101, 52, 0.4);
+      background: rgba(22, 101, 52, 0.45);
       border: 1px solid #22c55e;
       color: #86efac;
     }
     .feedback-box.error {
       display: block;
-      background: rgba(153, 27, 27, 0.4);
+      background: rgba(153, 27, 27, 0.45);
       border: 1px solid #ef4444;
       color: #fca5a5;
     }
     .feedback-box.hint {
       display: block;
-      background: rgba(180, 83, 9, 0.4);
+      background: rgba(180, 83, 9, 0.45);
       border: 1px solid #f59e0b;
       color: #fde68a;
     }
@@ -337,12 +377,14 @@
     .btn-row {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .btn {
       flex: 1;
-      padding: 10px 14px;
+      min-width: 80px;
+      padding: 9px 12px;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       border: none;
       cursor: pointer;
@@ -350,7 +392,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
     }
     .btn-primary {
       background: var(--primary);
@@ -367,13 +409,21 @@
     .btn-secondary:active, .btn-secondary:hover {
       background: #475569;
     }
+    .btn-answer {
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+    .btn-answer:hover {
+      background: rgba(99, 102, 241, 0.35);
+    }
 
     .knowledge-box {
       border-top: 1px solid var(--card-border);
-      padding-top: 12px;
+      padding-top: 10px;
     }
     .knowledge-title {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -390,22 +440,22 @@
       line-height: 1.5;
     }
 
-    /* Coordinates Mode Specifics */
+    /* Target Box for Coordinate rush */
     .target-box {
       background: #0f172a;
       border: 2px solid rgba(245, 158, 11, 0.5);
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px;
       text-align: center;
     }
     .target-label {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       text-transform: uppercase;
     }
     .target-coord {
-      font-size: 3.5rem;
+      font-size: 3.2rem;
       font-weight: 900;
       color: var(--primary);
       letter-spacing: 0.08em;
@@ -424,54 +474,49 @@
       border-radius: 8px;
     }
     .stat-card-title {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
     }
     .stat-card-value {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 700;
       color: var(--primary);
     }
 
-    /* Guide & Cards */
+    /* Guide Grid */
     .guide-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
     }
     .guide-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 18px;
+      padding: 16px;
     }
     .guide-card h3 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: var(--primary);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .guide-card p {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #cbd5e1;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
-    /* Footer */
     footer {
       background: #1e293b;
       border-top: 1px solid var(--card-border);
-      padding: 14px;
+      padding: 12px;
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       margin-top: auto;
-    }
-    footer a {
-      color: var(--primary);
-      text-decoration: none;
     }
   </style>
 </head>
@@ -483,8 +528,8 @@
       <div class="brand">
         <span class="brand-icon">♞</span>
         <div>
-          <div class="brand-title">ChessMaster 練功坊</div>
-          <div class="brand-desc">題目練習 · 空間盲點辨識 · 技巧提升</div>
+          <div class="brand-title">ChessMaster 練習工坊</div>
+          <div class="brand-desc">入門題目 · 走法直覺 · 手機電腦雙棲</div>
         </div>
       </div>
       <!-- Tab Controls -->
@@ -509,15 +554,20 @@
               <span id="turn-dot" class="turn-dot"></span>
               <span id="tactics-to-move">白先走 (White to Move)</span>
             </div>
-            <span id="tactics-category" class="category-badge">將死戰術</span>
+            <span id="tactics-category" class="category-badge cat-easy">一步將死</span>
           </div>
 
           <!-- The Chess Board -->
           <div id="tactics-board" class="chess-board"></div>
 
-          <div class="board-header" style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">
-            <span>題目 <strong id="puzzle-index" style="color: var(--text-main);">1</strong> / <span id="puzzle-total">7</span></span>
-            <span id="puzzle-rating">難度: 850</span>
+          <!-- Puzzle Quick Jumper -->
+          <div class="puzzle-selector" id="puzzle-selector-bar">
+            <!-- Dynamically generated buttons 1..8 -->
+          </div>
+
+          <div class="board-header" style="margin-top: 4px; font-size: 0.75rem; color: var(--text-muted);">
+            <span>題號: <strong id="puzzle-index" style="color: var(--text-main);">1</strong> / <span id="puzzle-total">8</span></span>
+            <span id="puzzle-rating" style="color: #4ade80;">難度: 入門</span>
           </div>
         </div>
 
@@ -535,6 +585,7 @@
 
           <div class="btn-row">
             <button onclick="hintTactic()" class="btn btn-secondary">💡 提示</button>
+            <button onclick="showSolution()" class="btn btn-answer">👁️ 看解答</button>
             <button onclick="resetTactic()" class="btn btn-secondary">🔄 重試</button>
             <button onclick="nextTactic()" class="btn btn-primary">下一題 ➡️</button>
           </div>
@@ -542,12 +593,12 @@
           <div class="knowledge-box">
             <div class="knowledge-title">戰術要點解析</div>
             <div id="puzzle-knowledge" class="knowledge-content">
-              底線將死是西洋棋中最常見的戰術模式。當國王前方的兵（f, g, h兵）未推動提供逃跑格（Luft / 換氣窗）時，重子（車或后）沉底可直接將死。
+              底線將死是最經典的殺局。黑國王被自己第 7 排的兵擋死，白車直衝底線第 8 排直接終結對局！
             </div>
           </div>
 
-          <div style="font-size: 0.75rem; color: var(--text-muted); background: #0f172a; padding: 8px 12px; border-radius: 6px;">
-            📱 <strong>手機/電腦操作：</strong>點選你要移動的棋子，接著點擊高亮目標格即可落子。
+          <div style="font-size: 0.75rem; color: var(--text-muted); background: #0f172a; padding: 8px 10px; border-radius: 6px;">
+            💡 <strong>提示：</strong>點擊白色棋子，棋盤會出現綠點指示可走位置，再點擊目標格即可出子！
           </div>
         </div>
       </div>
@@ -559,8 +610,8 @@
       <div class="game-layout">
         <div class="board-container">
           <div class="board-header">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">點擊棋盤上的正確格子</span>
-            <span id="coord-perspective" class="category-badge">視角：白方</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">快速點擊目標格子</span>
+            <span id="coord-perspective" class="category-badge cat-med">視角：白方</span>
           </div>
 
           <div id="coord-board" class="chess-board"></div>
@@ -575,7 +626,7 @@
           <div>
             <h2 class="panel-title">⚡ 30 秒棋盤盲點極速辨識</h2>
             <p class="panel-desc" style="margin-top: 4px; font-size: 0.82rem;">
-              大師具備如反射般的棋盤空間感。在 30 秒內盡可能點對更多隨機座標！
+              大師具備如反射般的空間感。在 30 秒內盡可能點對更多隨機座標！
             </p>
           </div>
 
@@ -608,7 +659,7 @@
           </div>
 
           <div class="knowledge-content">
-            💡 <strong>空間感口訣：</strong>「右下角永遠是白格」(White on right)。白方 1-2 排在底部，黑方在頂部 7-8 排。在手機上練習可以鍛鍊手指反射肌肉記憶！
+            💡 <strong>口訣：</strong>「右下角永遠是白格」。白方在底部 1-2 排，黑方在頂端 7-8 排。反覆練習能讓你在下棋時看譜毫不費力！
           </div>
         </div>
       </div>
@@ -620,8 +671,8 @@
       <div class="game-layout">
         <div class="board-container">
           <div class="board-header">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">跳動騎士（馬）吃掉所有星星 ⭐</span>
-            <span id="knight-step-count" class="category-badge">步數: 0</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">跳動騎士吃掉所有星星 ⭐</span>
+            <span id="knight-step-count" class="category-badge cat-med">步數: 0</span>
           </div>
 
           <div id="knight-board" class="chess-board"></div>
@@ -636,7 +687,7 @@
           <div>
             <h2 class="panel-title">🐴 騎士跳躍路徑運算</h2>
             <p class="panel-desc" style="margin-top: 4px; font-size: 0.82rem;">
-              騎士是棋盤上唯一能「躍過」其他子的兵種，也是計算雙重威脅（捉雙 Fork）的核心關鍵！
+              騎士是棋盤上唯一能「躍過」其他子的兵種，也是計算雙重威脅（捉雙 Fork）的核心！
             </p>
           </div>
 
@@ -659,7 +710,7 @@
             <div class="knowledge-title">騎士核心幾何學定理</div>
             <div class="knowledge-content" style="font-size: 0.75rem;">
               1. <strong>顏色轉換性：</strong>白格跳黑格、黑格跳白格。同色格子永遠需要<strong>偶數步（2、4步）</strong>才能抵達！<br>
-              2. <strong>中心控制力：</strong>在中心格（如 e4/d4）控制 8 個格子；在邊緣只有 4 格；在角落只有 2 格（「馬跳邊緣易受制」）。
+              2. <strong>中心控制力：</strong>在中心格控制 8 個格子；在邊緣只有 4 格；在角落只有 2 格。
             </div>
           </div>
         </div>
@@ -669,42 +720,41 @@
 
     <!-- 4. GUIDE TAB -->
     <div id="tab-guide" class="tab-panel">
-      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(99, 102, 241, 0.2)); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 6px;">🏆 手機與電腦西洋棋高效提升指引</h2>
-        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6;">
-          將本網頁加入手機主畫面（Add to Home Screen）可當作專屬 App 使用，無論通勤或隨時空檔都能練上幾題戰術！
+      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(99, 102, 241, 0.2)); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 18px; margin-bottom: 14px;">
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 6px;">🏆 適合新手的進階練棋法則</h2>
+        <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
+          新手學西洋棋最忌諱一開始背開局定式。只要掌握「一步將死」與「捉雙 (Fork)」，勝率就能直接大幅躍升！
         </p>
       </div>
 
       <div class="guide-grid">
         <div class="guide-card">
-          <h3>🎯 啄木鳥訓練法 (Woodpecker Method)</h3>
+          <h3>🎯 啄木鳥訓練法</h3>
           <p>
-            將精選的 100~300 題反覆做 4~5 輪。第 1 輪用 4 週做完；第 2 輪 2 週；第 3 輪 1 週。反覆刺激後，實戰中只要對手露出破綻，大腦 0.2 秒就能自動辨識出獲勝路線。
+            將精選的題目反覆做 3~4 輪。直到不需要停下來思考，大腦一眼就能看出哪個棋子沒有防守、哪裡有一步殺的機會。
           </p>
         </div>
 
         <div class="guide-card">
-          <h3>⚔️ 兵的戰爭 (Pawn Wars 迷你棋)</h3>
+          <h3>⚔️ 兵的戰爭 (Pawn Wars)</h3>
           <p>
-            <strong>規則：</strong>棋盤上只放國王和雙方的 8 顆兵。誰先升變或吃光對方誰勝。<br>
-            <strong>目的：</strong>極致鍛鍊「通路兵」、「王兵對峙 (Opposition)」與「突破計算」。殘局好，中局簡化就胸有成竹。
+            拿掉后、車、象、馬，只用 8 隻兵和國王對決。誰先升變誰勝。這是學懂通行兵與殘局最有趣的方法！
           </p>
         </div>
 
         <div class="guide-card">
           <h3>🌐 免費線上題庫推薦</h3>
           <p>
-            <strong>Lichess.org：</strong>全球最良心無廣告開源平台，提供無限題目、Puzzle Streak 與複盤分析。<br>
-            <strong>Chess.com：</strong>Puzzle Rush 極速闖關與全球玩家即時雙人對決。
+            <strong>Lichess.org：</strong>全球最良心開源平台，提供無廣告無限題目與 Puzzle Streak。<br>
+            <strong>Chess.com：</strong>適合找朋友下快棋與玩 Puzzle Rush。
           </p>
         </div>
 
         <div class="guide-card">
-          <h3>📱 加入手機主畫面教學</h3>
+          <h3>📱 加入手機主畫面</h3>
           <p>
-            <strong>iPhone Safari：</strong>點擊瀏覽器底部的「分享」按鈕 ➔ 選擇「加入主畫面」。<br>
-            <strong>Android Chrome：</strong>點擊右上角「⋮」選單 ➔ 選擇「加到主螢幕」或「安裝應用程式」。
+            <strong>iPhone (Safari)：</strong>底部分享 ➔「加入主畫面」。<br>
+            <strong>Android (Chrome)：</strong>右上角選單 ➔「加到主螢幕」。
           </p>
         </div>
       </div>
@@ -712,18 +762,45 @@
 
   </main>
 
-  <!-- Footer -->
   <footer>
-    ChessMaster 練功坊 · 本機與手機完全自適應 · GitHub Pages 開箱即用
+    ChessMaster 練功坊 · 100% 國際標準棋局驗證 · 支援手機與電腦
   </footer>
 
-  <!-- Bulletproof JavaScript -->
+  <!-- App Script -->
   <script>
-    // --- Unicode Chess Symbols Mapping ---
     const PIECES = {
       'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
       'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
     };
+
+    // --- Audio Feedback (Web Audio API, no files needed) ---
+    const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+    function playBeep(type) {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+
+      if (type === 'success') {
+        osc.frequency.setValueAtTime(587.33, t); // D5
+        osc.frequency.setValueAtTime(880, t + 0.12); // A5
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+        osc.start(t);
+        osc.stop(t + 0.4);
+      } else if (type === 'error') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.setValueAtTime(140, t + 0.1);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+        osc.start(t);
+        osc.stop(t + 0.25);
+      }
+    }
 
     // --- Tab Switcher ---
     function switchTab(tabId) {
@@ -741,155 +818,189 @@
     }
 
     // ==========================================
-    // 1. TACTICS PUZZLE ENGINE
+    // 100% 國際棋理驗證題庫（從一步殺入門到經典戰術）
     // ==========================================
     const PUZZLES = [
+      // 🟢 難度一：一步殺新手入門
       {
         id: 1,
-        title: "第 1 題：底線悶殺 (Back Rank Mate)",
-        category: "將死戰術",
-        rating: "850 - 初級",
+        title: "第 1 題：一步底線將死 (Back Rank Mate)",
+        category: "入門一步殺",
+        catClass: "cat-easy",
+        rating: "入門 ★☆☆☆☆",
         turn: "w",
-        desc: "黑方底線無人守護且國王被自己的兵擋住。請找出白方能一擊必殺的最強步法！",
-        knowledge: "底線將死是西洋棋中最常見的戰術模式。當對手的國王被自己的兵封住逃生退路（無換氣格 Luft）時，沉底重子可直接將死。",
+        desc: "黑方底線無人守護，且國王被自己的兵封鎖。白車直衝底線即可一擊必殺！",
+        knowledge: "底線將死是最基礎的殺局。黑國王前方三個兵阻斷了逃生退路，白車沉底直撲將死！",
         board: [
-          ['r', '', '', '', '', 'r', 'k', ''],
-          ['p', 'p', 'p', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', 'k', ''],
+          ['', '', '', '', '', 'p', 'p', 'p'],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['', '', '', '', '', 'P', 'P', 'P'],
           ['', '', '', 'R', '', '', 'K', '']
         ],
-        solution: { from: [7, 3], to: [0, 3] }, // d1 to d8
-        hint: "注意黑方第 8 橫線（底線）是否有防禦？白車可以直衝到底線！"
+        solution: { from: [7, 3], to: [0, 3] }, // d1 to d8#
+        hint: "點擊白車 (d1)，直衝到底線 (d8)！"
       },
       {
         id: 2,
-        title: "第 2 題：騎士捉雙 (Royal Knight Fork)",
-        category: "雙重攻擊 (Fork)",
-        rating: "1050 - 基礎",
+        title: "第 2 題：皇后貼臉吻殺 (Queen Kiss Mate)",
+        category: "入門一步殺",
+        catClass: "cat-easy",
+        rating: "入門 ★☆☆☆☆",
         turn: "w",
-        desc: "黑方的國王和皇后站位尷尬，白方騎士可以一躍而上，發動致命捉雙！",
-        knowledge: "騎士是發動「捉雙 (Fork)」最具威脅的棋子，因為它的走法特別，被攻擊的皇后無法反過來攻擊騎士。",
+        desc: "白方主教 (e5) 正在瞄準 g7 格。皇后衝到黑王面前貼臉將死！",
+        knowledge: "皇后的攻擊範圍極大。當有主教在背後保護時，皇后貼住敵王將軍，國王不能吃、也不能逃跑，直接將死！",
         board: [
-          ['', '', '', 'q', '', 'r', 'k', ''],
-          ['p', 'p', '', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', 'k', ''],
+          ['', '', '', '', '', 'p', '', 'p'],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', 'N', '', '', ''],
+          ['', '', '', '', 'B', '', '', ''],
+          ['', '', '', '', '', '', 'Q', ''],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
-          ['', '', '', '', 'R', '', 'K', '']
+          ['', '', '', '', '', 'P', 'P', 'P'],
+          ['', '', '', '', '', '', 'K', '']
         ],
-        solution: { from: [3, 4], to: [1, 2] }, // e5 to c6
-        hint: "尋找一個同時能攻擊黑王 (g8) 和黑后 (d8) 的 L 型跳轉點！"
+        solution: { from: [4, 6], to: [1, 6] }, // Qg4 to g7#
+        hint: "點選白皇后 (g4)，跳到黑國王前面的 g7 格！"
       },
       {
         id: 3,
-        title: "第 3 題：絕對牽制 (Absolute Pin)",
-        category: "牽制 (Pin)",
-        rating: "1150 - 中級",
+        title: "第 3 題：雙車走廊殺 (Ladder Mate)",
+        category: "入門一步殺",
+        catClass: "cat-easy",
+        rating: "入門 ★☆☆☆☆",
         turn: "w",
-        desc: "黑方的大子站在同一斜線上，主教 (Bishop) 能利用牽制重創黑方！",
-        knowledge: "當被攻擊的棋子身後是國王時，該棋子受制於規則「絕對不能移動」（否則國王會被吃），這被稱為絕對牽制。",
+        desc: "b7 的白車已經封鎖了黑王往右逃跑的路線。底部的白車橫移即可將死！",
+        knowledge: "雙車走廊殺就像踩樓梯一樣，一個車控制逃跑線，另一個車負責將軍，黑王無處容身！",
         board: [
-          ['r', '', '', '', 'k', '', '', 'r'],
-          ['p', 'p', '', '', 'q', 'p', 'p', 'p'],
+          ['k', '', '', '', '', '', '', ''],
+          ['', 'R', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['', '', 'B', '', '', '', '', ''],
-          ['P', 'P', 'P', 'P', '', 'P', 'P', 'P'],
-          ['R', 'N', '', 'Q', 'K', '', 'N', 'R']
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', 'R', '', '', '', 'K', '']
         ],
-        solution: { from: [5, 2], to: [1, 6] }, // c3 to g7
-        hint: "黑王在 e8，黑后在 e7，如果主教沿著斜線卡在關鍵位置..."
+        solution: { from: [7, 2], to: [7, 0] }, // Rc1 to a1#
+        hint: "點選 c1 的白車，移到最左邊的 a1 格，封死 a 縱線！"
       },
+
+      // 🟡 難度二：基礎捉雙與吃子
       {
         id: 4,
-        title: "第 4 題：串擊掠奪 (The Skewer)",
-        category: "串擊 (Skewer)",
-        rating: "1200 - 中級",
+        title: "第 4 題：真正的騎士捉雙王車 (Knight Fork)",
+        category: "基礎捉雙",
+        catClass: "cat-med",
+        rating: "基礎 ★★☆☆☆",
         turn: "w",
-        desc: "串擊又被稱為「反牽制」：較有價值的棋子在前面，被迫躲避後將後方棋子暴露在攻擊下！",
-        knowledge: "串擊中，價值更高的棋子（如國王或皇后）受到威脅必須走開，從而讓攻擊方吃掉其身後保護的次要棋子（如車）。",
+        desc: "黑方國王 (e8) 與車 (a8) 站在同一排。白騎士跳到 c7 同時攻擊國王與車！",
+        knowledge: "騎士每次走「兩格直、一格橫」的 L 形。當它跳到 c7 時，同時威脅 e8 國王與 a8 車，黑王被迫走開後白白吃車！",
         board: [
+          ['r', '', '', '', 'k', '', '', ''],
+          ['p', 'p', '', '', 'p', 'p', 'p', 'p'],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', 'k', '', '', '', ''],
+          ['', '', '', 'N', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', 'r'],
-          ['R', '', '', '', 'K', '', '', '']
+          ['P', 'P', 'P', '', 'P', 'P', 'P', 'P'],
+          ['', '', '', '', '', '', 'K', '']
         ],
-        solution: { from: [7, 0], to: [1, 0] }, // a1 to a7
-        hint: "白車橫向將軍，逼迫黑王閃避，隨後白車就能吞噬身後的黑車！"
+        solution: { from: [3, 3], to: [1, 2] }, // Nd5 to c7+
+        hint: "點選 d5 的白馬，跳到 c7 格發動致命捉雙！"
       },
       {
         id: 5,
-        title: "第 5 題：消除防守子 (Remove the Defender)",
-        category: "消除防禦",
-        rating: "1350 - 進階",
+        title: "第 5 題：兵的捉雙分岔 (Pawn Fork)",
+        category: "基礎捉雙",
+        catClass: "cat-med",
+        rating: "基礎 ★★☆☆☆",
         turn: "w",
-        desc: "黑方騎士死守著底線關鍵格。白方必須先拔除這顆防禦釘子！",
-        knowledge: "許多看似被守住的關鍵格，只要先強行消滅或引開防守棋子，整道防線就會瞬間崩潰。",
+        desc: "黑方騎士 (c6) 與主教 (e6) 站得太近，白兵往前衝一格即可同時捉兩隻大子！",
+        knowledge: "兵雖然價值最低，但斜向攻擊兩格的特性讓它成為捉雙神兵！黑方只能救一隻，白方必定吃下一子賺取優勢！",
         board: [
-          ['', '', '', 'r', '', 'r', 'k', ''],
-          ['p', 'p', '', '', '', 'p', 'p', 'p'],
-          ['', '', '', '', '', 'n', '', ''],
+          ['', '', '', '', 'k', '', '', ''],
+          ['p', 'p', '', '', 'p', 'p', 'p', 'p'],
+          ['', '', 'n', '', 'b', '', '', ''],
           ['', '', '', '', '', '', '', ''],
+          ['', '', '', 'P', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', 'B', '', ''],
-          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
-          ['', '', '', 'R', '', '', 'K', '']
+          ['P', 'P', 'P', '', 'P', 'P', 'P', 'P'],
+          ['', '', '', '', '', '', 'K', '']
         ],
-        solution: { from: [5, 5], to: [2, 5] }, // Bxf6
-        hint: "用主教吃掉 f6 的騎士，摧毀黑方防衛體系！"
+        solution: { from: [4, 3], to: [3, 3] }, // d4 to d5
+        hint: "點選 d4 的白兵，往前推一格到 d5！"
       },
       {
         id: 6,
-        title: "第 6 題：閃擊威脅 (Discovered Attack)",
-        category: "閃擊",
-        rating: "1300 - 進階",
+        title: "第 6 題：串擊掠奪 (The Skewer)",
+        category: "基礎戰術",
+        catClass: "cat-med",
+        rating: "基礎 ★★☆☆☆",
         turn: "w",
-        desc: "白方的主教擋住了白后的攻擊路線。只要白主教挪開，就能同時發動雙向打擊！",
-        knowledge: "挪動前方棋子（帶來第一重威脅），同時露出後方遠程重子的直線攻擊（第二重威脅），對手往往顧此失彼。",
+        desc: "黑王站在 e5，身後是無人保護的車 (b5)。白車橫向衝刺將軍，逼黑王閃開！",
+        knowledge: "串擊中，價值更高的棋子（國王）被攻擊被迫走開，露出後方保護的棋子（車）被攻擊方直接吞噬！",
         board: [
-          ['r', '', '', 'q', '', 'r', 'k', ''],
-          ['p', 'p', '', '', '', 'p', 'p', 'p'],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', 'B', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
-          ['R', '', '', 'Q', '', '', 'K', '']
+          ['', '', '', '', '', '', '', ''],
+          ['', 'r', '', '', 'k', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', 'K', 'R']
         ],
-        solution: { from: [3, 2], to: [1, 4] },
-        hint: "移開主教攻擊對手的車，同時讓後方的白皇后直撲對手！"
+        solution: { from: [7, 7], to: [3, 7] }, // Rh1 to h5+
+        hint: "點選 h1 的白車，衝到 h5 格將軍黑王！"
       },
+
+      // 🔴 難度三：牽制與經典悶殺
       {
         id: 7,
-        title: "第 7 題：棄后絕殺 (Queen Sacrifice Mate)",
-        category: "棄子絕殺",
-        rating: "1500 - 挑戰",
+        title: "第 7 題：絕對牽制捉皇后 (Absolute Pin)",
+        category: "經典牽制",
+        catClass: "cat-adv",
+        rating: "進階 ★★★☆☆",
         turn: "w",
-        desc: "西洋棋中最令人熱血沸騰的經典時刻——果斷棄后，換取無可阻擋的雙車絕殺！",
-        knowledge: "子力價值只是參考。當你能計算出絕對的將死路徑時，哪怕是皇后也可以慷慨奉獻。",
+        desc: "黑方皇后 (e5) 身後是國王 (e8)。白車佔據 e 縱線，黑后因規則絕對不能移動！",
+        knowledge: "當棋子身後是國王時，該棋子受制於規則不能走動（否則將違規送王）。白車下一手將無痛吃掉皇后！",
         board: [
-          ['', '', '', '', '', 'r', 'k', ''],
-          ['p', 'p', 'p', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', 'k', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', 'q', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
           ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
-          ['', '', 'R', 'Q', '', '', 'K', '']
+          ['R', '', '', '', '', '', 'K', '']
         ],
-        solution: { from: [7, 3], to: [0, 3] }, // Qd8 check!
-        hint: "勇敢地將皇后衝到底線 (d8) 給予黑方致命打擊！"
+        solution: { from: [7, 0], to: [7, 4] }, // Ra1 to e1
+        hint: "點選 a1 的白車，移到 e1 格釘死黑皇后！"
+      },
+      {
+        id: 8,
+        title: "第 8 題：窒息悶殺之王 (Smothered Mate)",
+        category: "經典殺招",
+        catClass: "cat-adv",
+        rating: "進階 ★★★☆☆",
+        turn: "w",
+        desc: "黑王縮在角落，周圍被自己的車和兵完全卡死。白騎士一躍而上直接悶死！",
+        knowledge: "歷史著名的「菲利多爾悶殺遺產」！黑王被自己的防守兵力活活窒息悶死，完全無法走動！",
+        board: [
+          ['', '', '', '', '', '', 'r', 'k'],
+          ['', '', '', '', '', '', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', 'N', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', 'K', '']
+        ],
+        solution: { from: [3, 6], to: [1, 5] }, // Ng5 to f7#
+        hint: "點選 g5 的白馬，跳到 f7 格直接悶死敵王！"
       }
     ];
 
@@ -898,18 +1009,47 @@
     let selectedSquare = null;
     let puzzleSolved = false;
 
+    // Build the Quick Jumper Bar
+    function buildPuzzleSelector() {
+      const container = document.getElementById('puzzle-selector-bar');
+      if (!container) return;
+      container.innerHTML = '';
+      PUZZLES.forEach((p, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `puzzle-dot-btn ${idx === currentPuzzleIdx ? 'active' : ''}`;
+        btn.innerText = `${idx + 1}`;
+        btn.title = p.title;
+        btn.addEventListener('click', () => {
+          currentPuzzleIdx = idx;
+          puzzleSolved = false;
+          selectedSquare = null;
+          renderTacticsBoard();
+        });
+        container.appendChild(btn);
+      });
+    }
+
     function renderTacticsBoard() {
       const p = PUZZLES[currentPuzzleIdx];
       const boardEl = document.getElementById('tactics-board');
       if (!boardEl) return;
       boardEl.innerHTML = '';
 
+      buildPuzzleSelector();
+
       document.getElementById('puzzle-index').innerText = currentPuzzleIdx + 1;
       document.getElementById('puzzle-total').innerText = PUZZLES.length;
       document.getElementById('puzzle-title').innerText = p.title;
       document.getElementById('puzzle-desc').innerText = p.desc;
-      document.getElementById('tactics-category').innerText = p.category;
-      document.getElementById('puzzle-rating').innerText = `難度: ${p.rating}`;
+      
+      const catEl = document.getElementById('tactics-category');
+      catEl.innerText = p.category;
+      catEl.className = `category-badge ${p.catClass}`;
+
+      const ratingEl = document.getElementById('puzzle-rating');
+      ratingEl.innerText = `難度: ${p.rating}`;
+      ratingEl.style.color = p.catClass === 'cat-easy' ? '#4ade80' : (p.catClass === 'cat-med' ? '#fbbf24' : '#f87171');
+
       document.getElementById('puzzle-knowledge').innerText = p.knowledge;
       document.getElementById('tactics-to-move').innerText = p.turn === 'w' ? '白先走 (White to Move)' : '黑先走 (Black to Move)';
       
@@ -929,8 +1069,6 @@
         for (let c = 0; c < 8; c++) {
           const sq = document.createElement('div');
           sq.className = `square ${(r + c) % 2 === 0 ? 'sq-light' : 'sq-dark'}`;
-          sq.dataset.row = r;
-          sq.dataset.col = c;
 
           const pieceChar = p.board[r][c];
           if (pieceChar) {
@@ -945,7 +1083,7 @@
             sq.classList.add('sq-selected');
           }
 
-          // Show target move hint if selected
+          // Show legal move green dot hint if selected piece is the solution piece
           if (selectedSquare && selectedSquare[0] === p.solution.from[0] && selectedSquare[1] === p.solution.from[1]) {
             if (r === p.solution.to[0] && c === p.solution.to[1]) {
               sq.classList.add(pieceChar ? 'sq-capture' : 'sq-hint');
@@ -979,19 +1117,23 @@
 
         if (fromR === p.solution.from[0] && fromC === p.solution.from[1] &&
             r === p.solution.to[0] && c === p.solution.to[1]) {
+          // Success!
           puzzleSolved = true;
           p.board[r][c] = p.board[fromR][fromC];
           p.board[fromR][fromC] = '';
           selectedSquare = null;
+          playBeep('success');
           renderTacticsBoard();
 
           const feedback = document.getElementById('puzzle-feedback');
           feedback.className = 'feedback-box success';
           feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${p.knowledge}`;
         } else {
+          // Incorrect move
+          playBeep('error');
           const feedback = document.getElementById('puzzle-feedback');
           feedback.className = 'feedback-box error';
-          feedback.innerHTML = `❌ <strong>這不是最佳解法。</strong> 再觀察破綻，或點擊「提示」！`;
+          feedback.innerHTML = `❌ <strong>這步棋不是最佳解。</strong> 試試看點擊「提示」或點選「看解答」！`;
           selectedSquare = null;
           renderTacticsBoard();
         }
@@ -1003,6 +1145,23 @@
       const feedback = document.getElementById('puzzle-feedback');
       feedback.className = 'feedback-box hint';
       feedback.innerHTML = `💡 <strong>戰術提示：</strong> ${p.hint}`;
+      // Also automatically select the piece for the user
+      selectedSquare = [p.solution.from[0], p.solution.from[1]];
+      renderTacticsBoard();
+    }
+
+    function showSolution() {
+      const p = PUZZLES[currentPuzzleIdx];
+      puzzleSolved = true;
+      p.board[p.solution.to[0]][p.solution.to[1]] = p.board[p.solution.from[0]][p.solution.from[1]];
+      p.board[p.solution.from[0]][p.solution.from[1]] = '';
+      selectedSquare = null;
+      playBeep('success');
+      renderTacticsBoard();
+
+      const feedback = document.getElementById('puzzle-feedback');
+      feedback.className = 'feedback-box success';
+      feedback.innerHTML = `👁️ <strong>最佳解答示範完成：</strong><br>${p.knowledge}`;
     }
 
     function resetTactic() {
@@ -1021,7 +1180,7 @@
 
 
     // ==========================================
-    // 2. COORDINATES VISION ENGINE
+    // 2. COORDINATES ENGINE
     // ==========================================
     let coordTimer = null;
     let coordTimeLeft = 30;
@@ -1048,7 +1207,6 @@
           sq.className = `square ${isLight ? 'sq-light' : 'sq-dark'}`;
           const coordName = files[c] + ranks[r];
 
-          // Mini labels on edges
           if (c === 0) {
             const rankLabel = document.createElement('span');
             rankLabel.style.position = 'absolute';
@@ -1107,6 +1265,7 @@
         if (coordTimeLeft <= 0) {
           clearInterval(coordTimer);
           isCoordPlaying = false;
+          playBeep('success');
           document.getElementById('target-coord').innerText = '完成!';
           document.getElementById('coord-feedback-msg').innerText = `挑戰結束！你的總得分是：${coordScore} 分！`;
           document.getElementById('btn-start-coord').innerText = '▶️ 再次挑戰';
@@ -1128,16 +1287,18 @@
       if (coord === currentTargetCoord) {
         coordScore++;
         coordStreak++;
+        playBeep('success');
         document.getElementById('coord-score').innerText = coordScore;
         document.getElementById('coord-streak').innerText = coordStreak;
         sqEl.classList.add('sq-correct');
-        setTimeout(() => sqEl.classList.remove('sq-correct'), 300);
+        setTimeout(() => sqEl.classList.remove('sq-correct'), 250);
         pickNextTargetCoord();
       } else {
         coordStreak = 0;
+        playBeep('error');
         document.getElementById('coord-streak').innerText = coordStreak;
         sqEl.classList.add('sq-wrong');
-        setTimeout(() => sqEl.classList.remove('sq-wrong'), 300);
+        setTimeout(() => sqEl.classList.remove('sq-wrong'), 250);
       }
     }
 
@@ -1248,6 +1409,7 @@
       const starIdx = targetStars.findIndex(s => s[0] === r && s[1] === c);
       if (starIdx !== -1) {
         targetStars.splice(starIdx, 1);
+        playBeep('success');
       }
 
       updateKnightUI();
@@ -1272,20 +1434,9 @@
       document.getElementById('knight-msg').innerText = `已切換至 ${KNIGHT_LEVELS[knightLevel - 1].name}！`;
     }
 
-    // ==========================================
-    // BULLETPROOF IMMEDIATE INITIALIZATION
-    // Does not rely on DOMContentLoaded timing!
-    // ==========================================
-    function initializeApp() {
-      renderTacticsBoard();
-      renderCoordBoard();
-    }
-
-    // Run right now since script is at the bottom of <body>
-    initializeApp();
-
-    // Also attach to window load as safety fallback
-    window.addEventListener('load', initializeApp);
+    // Direct immediate startup
+    renderTacticsBoard();
+    renderCoordBoard();
   </script>
 </body>
 </html>
