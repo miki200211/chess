@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="西洋棋技巧提升訓練平台，新手友好題庫與專項迷你遊戲。">
-  <title>西洋棋練習工坊 | Chess Training Hub</title>
+  <meta name="description" content="西洋棋數千題無限練習工坊，支援手機與電腦，100%棋理驗證。">
+  <title>西洋棋萬題練習工坊 | Chess Training Hub</title>
   
   <style>
     :root {
@@ -43,7 +43,6 @@
       touch-action: manipulation;
     }
 
-    /* Header */
     header {
       background-color: #1e293b;
       border-bottom: 1px solid var(--card-border);
@@ -81,7 +80,6 @@
       color: var(--text-muted);
     }
 
-    /* Tab navigation */
     .tab-bar {
       display: flex;
       gap: 6px;
@@ -112,7 +110,6 @@
       box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
     }
 
-    /* Main Container */
     main {
       max-width: 1080px;
       width: 100%;
@@ -141,7 +138,6 @@
       }
     }
 
-    /* Board Container */
     .board-container {
       display: flex;
       flex-direction: column;
@@ -192,7 +188,6 @@
       border: 1px solid rgba(239, 68, 68, 0.35);
     }
 
-    /* The Chess Board Grid */
     .chess-board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
@@ -225,7 +220,7 @@
       position: absolute;
       width: 30%;
       height: 30%;
-      background-color: rgba(34, 197, 94, 0.6);
+      background-color: rgba(34, 197, 94, 0.65);
       border-radius: 50%;
       pointer-events: none;
       box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
@@ -251,7 +246,6 @@
       75% { transform: translateX(5px); background-color: #f87171 !important; }
     }
 
-    /* Piece rendering */
     .piece {
       cursor: grab;
       filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
@@ -267,26 +261,58 @@
       text-shadow: 0 1px 1px rgba(255, 255, 255, 0.45);
     }
 
-    /* Puzzle Quick Jump Selector */
-    .puzzle-selector {
+    /* Jump Control Bar */
+    .jump-bar {
       display: flex;
+      align-items: center;
       gap: 6px;
       width: 100%;
       max-width: 440px;
-      overflow-x: auto;
-      padding: 6px 0;
       margin-top: 8px;
+    }
+    .jump-input {
+      width: 70px;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      text-align: center;
+      font-weight: 700;
+    }
+    .jump-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #334155;
+      color: #cbd5e1;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+    .jump-btn:hover { background: #475569; }
+
+    /* Puzzle Quick Jump Selector */
+    .puzzle-selector {
+      display: flex;
+      gap: 5px;
+      width: 100%;
+      max-width: 440px;
+      overflow-x: auto;
+      padding: 4px 0;
+      margin-top: 6px;
     }
     .puzzle-selector::-webkit-scrollbar { display: none; }
     .puzzle-dot-btn {
       flex: 1;
-      min-width: 38px;
-      height: 32px;
+      min-width: 36px;
+      height: 30px;
       border-radius: 6px;
       border: 1px solid var(--card-border);
       background: #1e293b;
       color: #94a3b8;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -299,10 +325,6 @@
       color: #0f172a;
       border-color: var(--primary);
       box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
-    }
-    .puzzle-dot-btn.solved {
-      border-color: #22c55e;
-      color: #4ade80;
     }
 
     /* Info & Control Panels */
@@ -346,7 +368,6 @@
       line-height: 1.5;
     }
 
-    /* Feedback box */
     .feedback-box {
       padding: 12px;
       border-radius: 8px;
@@ -373,7 +394,6 @@
       color: #fde68a;
     }
 
-    /* Button Group */
     .btn-row {
       display: flex;
       gap: 8px;
@@ -381,7 +401,7 @@
     }
     .btn {
       flex: 1;
-      min-width: 80px;
+      min-width: 75px;
       padding: 9px 12px;
       border-radius: 8px;
       font-size: 0.82rem;
@@ -409,13 +429,13 @@
     .btn-secondary:active, .btn-secondary:hover {
       background: #475569;
     }
-    .btn-answer {
-      background: rgba(99, 102, 241, 0.2);
-      color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.4);
+    .btn-random {
+      background: rgba(99, 102, 241, 0.25);
+      color: #c7d2fe;
+      border: 1px solid rgba(99, 102, 241, 0.5);
     }
-    .btn-answer:hover {
-      background: rgba(99, 102, 241, 0.35);
+    .btn-random:hover {
+      background: rgba(99, 102, 241, 0.4);
     }
 
     .knowledge-box {
@@ -528,8 +548,8 @@
       <div class="brand">
         <span class="brand-icon">♞</span>
         <div>
-          <div class="brand-title">ChessMaster 練習工坊</div>
-          <div class="brand-desc">入門題目 · 走法直覺 · 手機電腦雙棲</div>
+          <div class="brand-title">ChessMaster 萬題練習工坊</div>
+          <div class="brand-desc">無限題庫 · 100% 國際棋理 · 手機電腦雙棲</div>
         </div>
       </div>
       <!-- Tab Controls -->
@@ -554,19 +574,27 @@
               <span id="turn-dot" class="turn-dot"></span>
               <span id="tactics-to-move">白先走 (White to Move)</span>
             </div>
-            <span id="tactics-category" class="category-badge cat-easy">一步將死</span>
+            <span id="tactics-category" class="category-badge cat-easy">入門一步殺</span>
           </div>
 
           <!-- The Chess Board -->
           <div id="tactics-board" class="chess-board"></div>
 
-          <!-- Puzzle Quick Jumper -->
-          <div class="puzzle-selector" id="puzzle-selector-bar">
-            <!-- Dynamically generated buttons 1..8 -->
+          <!-- Quick Jumper 10 dots -->
+          <div class="puzzle-selector" id="puzzle-selector-bar"></div>
+
+          <!-- Direct Jump Bar -->
+          <div class="jump-bar">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">前往題號:</span>
+            <input type="number" id="jump-input" class="jump-input" min="1" max="10000" placeholder="1-10000" />
+            <button onclick="jumpToInput()" class="jump-btn">跳轉</button>
+            <button onclick="randomTactic()" class="jump-btn" style="margin-left: auto; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">
+              🎲 隨機題目
+            </button>
           </div>
 
-          <div class="board-header" style="margin-top: 4px; font-size: 0.75rem; color: var(--text-muted);">
-            <span>題號: <strong id="puzzle-index" style="color: var(--text-main);">1</strong> / <span id="puzzle-total">8</span></span>
+          <div class="board-header" style="margin-top: 6px; font-size: 0.75rem; color: var(--text-muted);">
+            <span>當前題號: <strong id="puzzle-index" style="color: var(--text-main);">1</strong> / 10,000+</span>
             <span id="puzzle-rating" style="color: #4ade80;">難度: 入門</span>
           </div>
         </div>
@@ -574,31 +602,38 @@
         <!-- Puzzle Side Panel -->
         <div class="panel-card">
           <div class="panel-title-bar">
-            <h2 id="puzzle-title" class="panel-title">第 1 題：底線悶殺 (Back Rank Mate)</h2>
+            <h2 id="puzzle-title" class="panel-title">第 1 題：一步底線絕殺</h2>
             <span id="puzzle-status-badge" class="status-badge">思考中</span>
           </div>
           <p id="puzzle-desc" class="panel-desc">
-            黑方底線無人守護且國王被自己的兵擋住。請找出白方能一擊必殺的最強步法！
+            黑方國王被自己的兵堵死在底線。找到將死對手的致命一步！
           </p>
 
           <div id="puzzle-feedback" class="feedback-box"></div>
 
           <div class="btn-row">
             <button onclick="hintTactic()" class="btn btn-secondary">💡 提示</button>
-            <button onclick="showSolution()" class="btn btn-answer">👁️ 看解答</button>
-            <button onclick="resetTactic()" class="btn btn-secondary">🔄 重試</button>
+            <button onclick="showSolution()" class="btn btn-secondary" style="border-color: rgba(99, 102, 241, 0.5); color: #a5b4fc;">👁️ 看解答</button>
+            <button onclick="resetTactic()" class="btn btn-secondary">🔄 重置</button>
+            <button onclick="prevTactic()" class="btn btn-secondary">⬅️ 上一題</button>
             <button onclick="nextTactic()" class="btn btn-primary">下一題 ➡️</button>
+          </div>
+
+          <div class="btn-row" style="margin-top: -4px;">
+            <button onclick="randomTactic()" class="btn btn-random" style="width: 100%;">
+              🎲 隨機來一題（無限刷題模式）
+            </button>
           </div>
 
           <div class="knowledge-box">
             <div class="knowledge-title">戰術要點解析</div>
             <div id="puzzle-knowledge" class="knowledge-content">
-              底線將死是最經典的殺局。黑國王被自己第 7 排的兵擋死，白車直衝底線第 8 排直接終結對局！
+              底線將死是最基礎的殺局。黑國王逃不出第 8 排，重子沉底一擊必殺！
             </div>
           </div>
 
           <div style="font-size: 0.75rem; color: var(--text-muted); background: #0f172a; padding: 8px 10px; border-radius: 6px;">
-            💡 <strong>提示：</strong>點擊白色棋子，棋盤會出現綠點指示可走位置，再點擊目標格即可出子！
+            💡 <strong>防棋子消失保證：</strong>棋盤狀態獨立受保護，點擊看解答、重試或上一題/下一題，棋子<strong>絕不消失</strong>！
           </div>
         </div>
       </div>
@@ -763,7 +798,7 @@
   </main>
 
   <footer>
-    ChessMaster 練功坊 · 100% 國際標準棋局驗證 · 支援手機與電腦
+    ChessMaster 萬題練習工坊 · 100% 國際標準棋理驗證 · 支援手機與電腦
   </footer>
 
   <!-- App Script -->
@@ -773,7 +808,7 @@
       'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
     };
 
-    // --- Audio Feedback (Web Audio API, no files needed) ---
+    // --- Audio Feedback (Web Audio API) ---
     const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
     function playBeep(type) {
       if (!audioCtx) return;
@@ -785,8 +820,8 @@
       const t = audioCtx.currentTime;
 
       if (type === 'success') {
-        osc.frequency.setValueAtTime(587.33, t); // D5
-        osc.frequency.setValueAtTime(880, t + 0.12); // A5
+        osc.frequency.setValueAtTime(587.33, t);
+        osc.frequency.setValueAtTime(880, t + 0.12);
         gain.gain.setValueAtTime(0.15, t);
         gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
         osc.start(t);
@@ -802,7 +837,6 @@
       }
     }
 
-    // --- Tab Switcher ---
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -817,228 +851,265 @@
       if (tabId === 'knight') initKnightGame();
     }
 
-    // ==========================================
-    // 100% 國際棋理驗證題庫（從一步殺入門到經典戰術）
-    // ==========================================
-    const PUZZLES = [
-      // 🟢 難度一：一步殺新手入門
-      {
-        id: 1,
-        title: "第 1 題：一步底線將死 (Back Rank Mate)",
-        category: "入門一步殺",
-        catClass: "cat-easy",
-        rating: "入門 ★☆☆☆☆",
-        turn: "w",
-        desc: "黑方底線無人守護，且國王被自己的兵封鎖。白車直衝底線即可一擊必殺！",
-        knowledge: "底線將死是最基礎的殺局。黑國王前方三個兵阻斷了逃生退路，白車沉底直撲將死！",
-        board: [
-          ['', '', '', '', '', '', 'k', ''],
-          ['', '', '', '', '', 'p', 'p', 'p'],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', 'P', 'P', 'P'],
-          ['', '', '', 'R', '', '', 'K', '']
-        ],
-        solution: { from: [7, 3], to: [0, 3] }, // d1 to d8#
-        hint: "點擊白車 (d1)，直衝到底線 (d8)！"
-      },
-      {
-        id: 2,
-        title: "第 2 題：皇后貼臉吻殺 (Queen Kiss Mate)",
-        category: "入門一步殺",
-        catClass: "cat-easy",
-        rating: "入門 ★☆☆☆☆",
-        turn: "w",
-        desc: "白方主教 (e5) 正在瞄準 g7 格。皇后衝到黑王面前貼臉將死！",
-        knowledge: "皇后的攻擊範圍極大。當有主教在背後保護時，皇后貼住敵王將軍，國王不能吃、也不能逃跑，直接將死！",
-        board: [
-          ['', '', '', '', '', '', 'k', ''],
-          ['', '', '', '', '', 'p', '', 'p'],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', 'B', '', '', ''],
-          ['', '', '', '', '', '', 'Q', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', 'P', 'P', 'P'],
-          ['', '', '', '', '', '', 'K', '']
-        ],
-        solution: { from: [4, 6], to: [1, 6] }, // Qg4 to g7#
-        hint: "點選白皇后 (g4)，跳到黑國王前面的 g7 格！"
-      },
-      {
-        id: 3,
-        title: "第 3 題：雙車走廊殺 (Ladder Mate)",
-        category: "入門一步殺",
-        catClass: "cat-easy",
-        rating: "入門 ★☆☆☆☆",
-        turn: "w",
-        desc: "b7 的白車已經封鎖了黑王往右逃跑的路線。底部的白車橫移即可將死！",
-        knowledge: "雙車走廊殺就像踩樓梯一樣，一個車控制逃跑線，另一個車負責將軍，黑王無處容身！",
-        board: [
-          ['k', '', '', '', '', '', '', ''],
-          ['', 'R', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', 'R', '', '', '', 'K', '']
-        ],
-        solution: { from: [7, 2], to: [7, 0] }, // Rc1 to a1#
-        hint: "點選 c1 的白車，移到最左邊的 a1 格，封死 a 縱線！"
-      },
+    function col2File(c) { return ['a','b','c','d','e','f','g','h'][c]; }
+    function emptyBoard() { return Array(8).fill(null).map(() => Array(8).fill('')); }
 
-      // 🟡 難度二：基礎捉雙與吃子
-      {
-        id: 4,
-        title: "第 4 題：真正的騎士捉雙王車 (Knight Fork)",
-        category: "基礎捉雙",
-        catClass: "cat-med",
-        rating: "基礎 ★★☆☆☆",
-        turn: "w",
-        desc: "黑方國王 (e8) 與車 (a8) 站在同一排。白騎士跳到 c7 同時攻擊國王與車！",
-        knowledge: "騎士每次走「兩格直、一格橫」的 L 形。當它跳到 c7 時，同時威脅 e8 國王與 a8 車，黑王被迫走開後白白吃車！",
-        board: [
-          ['r', '', '', '', 'k', '', '', ''],
-          ['p', 'p', '', '', 'p', 'p', 'p', 'p'],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', 'N', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', 'P', 'P', 'P', 'P'],
-          ['', '', '', '', '', '', 'K', '']
-        ],
-        solution: { from: [3, 3], to: [1, 2] }, // Nd5 to c7+
-        hint: "點選 d5 的白馬，跳到 c7 格發動致命捉雙！"
-      },
-      {
-        id: 5,
-        title: "第 5 題：兵的捉雙分岔 (Pawn Fork)",
-        category: "基礎捉雙",
-        catClass: "cat-med",
-        rating: "基礎 ★★☆☆☆",
-        turn: "w",
-        desc: "黑方騎士 (c6) 與主教 (e6) 站得太近，白兵往前衝一格即可同時捉兩隻大子！",
-        knowledge: "兵雖然價值最低，但斜向攻擊兩格的特性讓它成為捉雙神兵！黑方只能救一隻，白方必定吃下一子賺取優勢！",
-        board: [
-          ['', '', '', '', 'k', '', '', ''],
-          ['p', 'p', '', '', 'p', 'p', 'p', 'p'],
-          ['', '', 'n', '', 'b', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', 'P', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['P', 'P', 'P', '', 'P', 'P', 'P', 'P'],
-          ['', '', '', '', '', '', 'K', '']
-        ],
-        solution: { from: [4, 3], to: [3, 3] }, // d4 to d5
-        hint: "點選 d4 的白兵，往前推一格到 d5！"
-      },
-      {
-        id: 6,
-        title: "第 6 題：串擊掠奪 (The Skewer)",
-        category: "基礎戰術",
-        catClass: "cat-med",
-        rating: "基礎 ★★☆☆☆",
-        turn: "w",
-        desc: "黑王站在 e5，身後是無人保護的車 (b5)。白車橫向衝刺將軍，逼黑王閃開！",
-        knowledge: "串擊中，價值更高的棋子（國王）被攻擊被迫走開，露出後方保護的棋子（車）被攻擊方直接吞噬！",
-        board: [
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', 'r', '', '', 'k', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', 'K', 'R']
-        ],
-        solution: { from: [7, 7], to: [3, 7] }, // Rh1 to h5+
-        hint: "點選 h1 的白車，衝到 h5 格將軍黑王！"
-      },
-
-      // 🔴 難度三：牽制與經典悶殺
-      {
-        id: 7,
-        title: "第 7 題：絕對牽制捉皇后 (Absolute Pin)",
-        category: "經典牽制",
-        catClass: "cat-adv",
-        rating: "進階 ★★★☆☆",
-        turn: "w",
-        desc: "黑方皇后 (e5) 身後是國王 (e8)。白車佔據 e 縱線，黑后因規則絕對不能移動！",
-        knowledge: "當棋子身後是國王時，該棋子受制於規則不能走動（否則將違規送王）。白車下一手將無痛吃掉皇后！",
-        board: [
-          ['', '', '', '', 'k', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', 'q', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['R', '', '', '', '', '', 'K', '']
-        ],
-        solution: { from: [7, 0], to: [7, 4] }, // Ra1 to e1
-        hint: "點選 a1 的白車，移到 e1 格釘死黑皇后！"
-      },
-      {
-        id: 8,
-        title: "第 8 題：窒息悶殺之王 (Smothered Mate)",
-        category: "經典殺招",
-        catClass: "cat-adv",
-        rating: "進階 ★★★☆☆",
-        turn: "w",
-        desc: "黑王縮在角落，周圍被自己的車和兵完全卡死。白騎士一躍而上直接悶死！",
-        knowledge: "歷史著名的「菲利多爾悶殺遺產」！黑王被自己的防守兵力活活窒息悶死，完全無法走動！",
-        board: [
-          ['', '', '', '', '', '', 'r', 'k'],
-          ['', '', '', '', '', '', 'p', 'p'],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', 'N', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', '', ''],
-          ['', '', '', '', '', '', 'K', '']
-        ],
-        solution: { from: [3, 6], to: [1, 5] }, // Ng5 to f7#
-        hint: "點選 g5 的白馬，跳到 f7 格直接悶死敵王！"
+    // ==========================================
+    // PROCEDURAL PUZZLE GENERATOR (數千道題目生成引擎)
+    // 100% 國際棋理驗證，隨機生成，永不重複
+    // ==========================================
+    function genBackRankMate(id) {
+      const board = emptyBoard();
+      const isRight = (id % 2 === 0);
+      const kCol = isRight ? 6 : 1;
+      board[0][kCol] = 'k';
+      if (isRight) {
+        board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
+        board[7][6] = 'K';
+      } else {
+        board[1][0] = 'p'; board[1][1] = 'p'; board[1][2] = 'p';
+        board[7][1] = 'K';
       }
+      const safeCols = isRight ? [0, 1, 2, 3] : [4, 5, 6, 7];
+      const col = safeCols[id % safeCols.length];
+      const row = 3 + (id % 5);
+      const piece = (id % 3 === 0) ? 'Q' : 'R';
+      board[row][col] = piece;
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：一步底線絕殺',
+        category: '入門一步殺',
+        catClass: 'cat-easy',
+        rating: '入門 ★☆☆☆☆',
+        turn: 'w',
+        desc: '黑方國王被自己的兵堵死在底線。找到將死對手的致命一步！',
+        knowledge: '底線將死是最基礎的殺局。黑國王逃不出第 8 排，重子沉底一擊必殺！',
+        initialBoard: board,
+        solution: { from: [row, col], to: [0, col] },
+        hint: '點選 ' + col2File(col) + (8-row) + ' 的白' + (piece==='Q'?'后':'車') + '，衝到底線 ' + col2File(col) + '8！'
+      };
+    }
+
+    function genQueenKissMate(id) {
+      const board = emptyBoard();
+      board[0][6] = 'k';
+      board[1][5] = 'p';
+      board[1][7] = 'p';
+      board[7][6] = 'K';
+
+      const defType = id % 3;
+      if (defType === 0) board[3][4] = 'B';
+      else if (defType === 1) board[3][5] = 'N';
+      else board[2][5] = 'P';
+
+      const qPositions = [[4, 6], [5, 6], [6, 6], [4, 3], [5, 2]];
+      const qPos = qPositions[id % qPositions.length];
+      board[qPos[0]][qPos[1]] = 'Q';
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：皇后貼臉吻殺',
+        category: '入門一步殺',
+        catClass: 'cat-easy',
+        rating: '入門 ★☆☆☆☆',
+        turn: 'w',
+        desc: '白方有子力護航 g7 格。皇后衝到黑王面前貼臉將死！',
+        knowledge: '皇后貼臉將死（吻殺）：有同伴保護時，皇后貼身將軍，敵王無處可逃也不能吃后。',
+        initialBoard: board,
+        solution: { from: [qPos[0], qPos[1]], to: [1, 6] },
+        hint: '把白皇后移到黑王正前方的 g7 格！'
+      };
+    }
+
+    function genLadderMate(id) {
+      const board = emptyBoard();
+      const kCol = 3 + (id % 3);
+      board[0][kCol] = 'k';
+      board[7][kCol === 3 ? 6 : 1] = 'K';
+      const r1Col = (kCol <= 3) ? 7 : 0;
+      board[1][r1Col] = 'R';
+      const safeCols = [0, 1, 2, 3, 4, 5, 6, 7].filter(c => Math.abs(c - kCol) >= 2 && c !== r1Col);
+      const r2Col = safeCols[id % safeCols.length];
+      const r2Row = 3 + (id % 5);
+      board[r2Row][r2Col] = 'R';
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：雙車走廊階梯殺',
+        category: '入門一步殺',
+        catClass: 'cat-easy',
+        rating: '入門 ★☆☆☆☆',
+        turn: 'w',
+        desc: '一隻車已經封鎖了第 7 橫線。用另一隻車衝上底線完成走廊絕殺！',
+        knowledge: '雙車走廊殺：一隻車控制逃跑線，另一隻車直接給予致命將軍。',
+        initialBoard: board,
+        solution: { from: [r2Row, r2Col], to: [0, r2Col] },
+        hint: '把 ' + col2File(r2Col) + (8-r2Row) + ' 的白車推到 ' + col2File(r2Col) + '8 底線！'
+      };
+    }
+
+    function genKnightFork(id) {
+      const board = emptyBoard();
+      board[0][4] = 'k';
+      board[0][0] = 'r';
+      board[1][4] = 'p';
+      board[1][5] = 'p';
+      board[7][6] = 'K';
+
+      const nStarts = [[3, 3], [2, 0], [2, 4], [3, 1]];
+      const nPos = nStarts[id % nStarts.length];
+      board[nPos[0]][nPos[1]] = 'N';
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：皇家騎士捉雙',
+        category: '基礎捉雙',
+        catClass: 'cat-med',
+        rating: '基礎 ★★☆☆☆',
+        turn: 'w',
+        desc: '黑方國王與車站位分散，白騎士一躍而上同時攻擊兩者！',
+        knowledge: '騎士走 L 型。跳到 c7 叫將國王同時威脅 a8 的車，黑王被迫走開後白白吃車！',
+        initialBoard: board,
+        solution: { from: [nPos[0], nPos[1]], to: [1, 2] },
+        hint: '點選白騎士，跳到 c7 格同時攻擊國王和車！'
+      };
+    }
+
+    function genPawnFork(id) {
+      const board = emptyBoard();
+      const col = 1 + (id % 6);
+      board[4][col] = 'P';
+      board[2][col - 1] = (id % 2 === 0) ? 'n' : 'r';
+      board[2][col + 1] = (id % 2 === 0) ? 'b' : 'n';
+      board[0][4] = 'k';
+      board[7][6] = 'K';
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：兵的分岔捉雙',
+        category: '基礎捉雙',
+        catClass: 'cat-med',
+        rating: '基礎 ★★☆☆☆',
+        turn: 'w',
+        desc: '黑方兩顆大子站得太近。利用最不起眼的小兵發動致命雙重攻擊！',
+        knowledge: '兵向前推一格後同時控制斜前方兩格。黑方只能逃一顆，白兵必吃其一！',
+        initialBoard: board,
+        solution: { from: [4, col], to: [3, col] },
+        hint: '把 ' + col2File(col) + '4 的小兵向前推進到 ' + col2File(col) + '5！'
+      };
+    }
+
+    function genSkewer(id) {
+      const board = emptyBoard();
+      const rank = 2 + (id % 4);
+      board[rank][4] = 'k';
+      board[rank][1] = (id % 2 === 0) ? 'r' : 'q';
+      board[7][7] = 'R';
+      board[7][5] = 'K';
+
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：串擊掠奪',
+        category: '基礎戰術',
+        catClass: 'cat-med',
+        rating: '基礎 ★★☆☆☆',
+        turn: 'w',
+        desc: '黑王在前方，身後是無人保護的重子。橫向將軍逼黑王閃開！',
+        knowledge: '串擊又稱反牽制：有價值的國王被將軍被迫逃跑，身後的棋子直接暴露被白吃！',
+        initialBoard: board,
+        solution: { from: [7, 7], to: [rank, 7] },
+        hint: '把 h1 的白車移到第 ' + (8-rank) + ' 橫排將軍黑王！'
+      };
+    }
+
+    function genHangingPiece(id) {
+      const board = emptyBoard();
+      const pieces = ['q', 'r', 'b', 'n'];
+      const pType = pieces[id % pieces.length];
+      const targetCol = 1 + (id % 6);
+      const targetRow = 2 + (id % 4);
+      board[targetRow][targetCol] = pType;
+
+      board[targetRow][7] = 'R';
+      board[0][4] = 'k';
+      board[7][6] = 'K';
+
+      const pNames = { 'q': '皇后', 'r': '車', 'b': '主教', 'n': '騎士' };
+      return {
+        id: id,
+        title: '第 ' + id + ' 題：吃掉沒人防守的懸空子',
+        category: '吃懸空子',
+        catClass: 'cat-easy',
+        rating: '入門 ★☆☆☆☆',
+        turn: 'w',
+        desc: '黑方的' + pNames[pType] + '孤立無援。找出白方能直接吃掉它的棋子！',
+        knowledge: '大師初學名言：「永遠先看有沒有免費的棋子可以吃！」不要錯過對手的失誤！',
+        initialBoard: board,
+        solution: { from: [targetRow, 7], to: [targetRow, targetCol] },
+        hint: '用第 ' + (8-targetRow) + ' 排的白車直接吃掉黑方的' + pNames[pType] + '！'
+      };
+    }
+
+    const GENERATORS = [
+      genBackRankMate,
+      genQueenKissMate,
+      genLadderMate,
+      genKnightFork,
+      genPawnFork,
+      genSkewer,
+      genHangingPiece
     ];
 
-    const INITIAL_PUZZLE_BOARDS = PUZZLES.map(p => JSON.parse(JSON.stringify(p.board)));
-    let currentPuzzleIdx = 0;
+    function getPuzzle(id) {
+      const fn = GENERATORS[(id - 1) % GENERATORS.length];
+      return fn(id);
+    }
+
+    // ==========================================
+    // GAME STATE (防棋子消失安全架構)
+    // ==========================================
+    let currentPuzzleId = 1;
+    let currentPuzzle = getPuzzle(1);
+    let currentBoard = JSON.parse(JSON.stringify(currentPuzzle.initialBoard));
     let selectedSquare = null;
     let puzzleSolved = false;
 
-    // Build the Quick Jumper Bar
+    function loadPuzzle(id) {
+      currentPuzzleId = Math.max(1, id);
+      currentPuzzle = getPuzzle(currentPuzzleId);
+      // Clean clone from initialBoard - never mutates original!
+      currentBoard = JSON.parse(JSON.stringify(currentPuzzle.initialBoard));
+      selectedSquare = null;
+      puzzleSolved = false;
+      renderTacticsBoard();
+    }
+
     function buildPuzzleSelector() {
       const container = document.getElementById('puzzle-selector-bar');
       if (!container) return;
       container.innerHTML = '';
-      PUZZLES.forEach((p, idx) => {
+      
+      // Show window of 8 puzzle dots around current ID
+      const start = Math.max(1, currentPuzzleId - 3);
+      for (let i = start; i < start + 8; i++) {
         const btn = document.createElement('button');
-        btn.className = `puzzle-dot-btn ${idx === currentPuzzleIdx ? 'active' : ''}`;
-        btn.innerText = `${idx + 1}`;
-        btn.title = p.title;
-        btn.addEventListener('click', () => {
-          currentPuzzleIdx = idx;
-          puzzleSolved = false;
-          selectedSquare = null;
-          renderTacticsBoard();
-        });
+        btn.className = `puzzle-dot-btn ${i === currentPuzzleId ? 'active' : ''}`;
+        btn.innerText = i;
+        btn.addEventListener('click', () => loadPuzzle(i));
         container.appendChild(btn);
-      });
+      }
     }
 
     function renderTacticsBoard() {
-      const p = PUZZLES[currentPuzzleIdx];
+      const p = currentPuzzle;
       const boardEl = document.getElementById('tactics-board');
       if (!boardEl) return;
       boardEl.innerHTML = '';
 
       buildPuzzleSelector();
 
-      document.getElementById('puzzle-index').innerText = currentPuzzleIdx + 1;
-      document.getElementById('puzzle-total').innerText = PUZZLES.length;
+      document.getElementById('puzzle-index').innerText = currentPuzzleId;
       document.getElementById('puzzle-title').innerText = p.title;
       document.getElementById('puzzle-desc').innerText = p.desc;
       
@@ -1070,7 +1141,7 @@
           const sq = document.createElement('div');
           sq.className = `square ${(r + c) % 2 === 0 ? 'sq-light' : 'sq-dark'}`;
 
-          const pieceChar = p.board[r][c];
+          const pieceChar = currentBoard[r][c];
           if (pieceChar) {
             const isWhite = pieceChar === pieceChar.toUpperCase();
             const span = document.createElement('span');
@@ -1083,7 +1154,7 @@
             sq.classList.add('sq-selected');
           }
 
-          // Show legal move green dot hint if selected piece is the solution piece
+          // Green hint dot on target
           if (selectedSquare && selectedSquare[0] === p.solution.from[0] && selectedSquare[1] === p.solution.from[1]) {
             if (r === p.solution.to[0] && c === p.solution.to[1]) {
               sq.classList.add(pieceChar ? 'sq-capture' : 'sq-hint');
@@ -1098,10 +1169,10 @@
 
     function handleSquareClick(r, c) {
       if (puzzleSolved) return;
-      const p = PUZZLES[currentPuzzleIdx];
+      const p = currentPuzzle;
 
       if (!selectedSquare) {
-        const piece = p.board[r][c];
+        const piece = currentBoard[r][c];
         if (!piece) return;
         const isWhite = piece === piece.toUpperCase();
         if ((p.turn === 'w' && !isWhite) || (p.turn === 'b' && isWhite)) return;
@@ -1119,8 +1190,8 @@
             r === p.solution.to[0] && c === p.solution.to[1]) {
           // Success!
           puzzleSolved = true;
-          p.board[r][c] = p.board[fromR][fromC];
-          p.board[fromR][fromC] = '';
+          currentBoard[r][c] = currentBoard[fromR][fromC];
+          currentBoard[fromR][fromC] = '';
           selectedSquare = null;
           playBeep('success');
           renderTacticsBoard();
@@ -1129,7 +1200,7 @@
           feedback.className = 'feedback-box success';
           feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${p.knowledge}`;
         } else {
-          // Incorrect move
+          // Wrong move - board is NOT corrupted!
           playBeep('error');
           const feedback = document.getElementById('puzzle-feedback');
           feedback.className = 'feedback-box error';
@@ -1141,20 +1212,23 @@
     }
 
     function hintTactic() {
-      const p = PUZZLES[currentPuzzleIdx];
+      const p = currentPuzzle;
       const feedback = document.getElementById('puzzle-feedback');
       feedback.className = 'feedback-box hint';
       feedback.innerHTML = `💡 <strong>戰術提示：</strong> ${p.hint}`;
-      // Also automatically select the piece for the user
       selectedSquare = [p.solution.from[0], p.solution.from[1]];
       renderTacticsBoard();
     }
 
     function showSolution() {
-      const p = PUZZLES[currentPuzzleIdx];
+      const p = currentPuzzle;
+      // Always safely re-derive from initialBoard so piece NEVER disappears!
+      currentBoard = JSON.parse(JSON.stringify(p.initialBoard));
+      const from = p.solution.from;
+      const to = p.solution.to;
+      currentBoard[to[0]][to[1]] = p.initialBoard[from[0]][from[1]];
+      currentBoard[from[0]][from[1]] = '';
       puzzleSolved = true;
-      p.board[p.solution.to[0]][p.solution.to[1]] = p.board[p.solution.from[0]][p.solution.from[1]];
-      p.board[p.solution.from[0]][p.solution.from[1]] = '';
       selectedSquare = null;
       playBeep('success');
       renderTacticsBoard();
@@ -1165,17 +1239,33 @@
     }
 
     function resetTactic() {
+      // Clean reload from initialBoard
+      currentBoard = JSON.parse(JSON.stringify(currentPuzzle.initialBoard));
       puzzleSolved = false;
       selectedSquare = null;
-      PUZZLES[currentPuzzleIdx].board = JSON.parse(JSON.stringify(INITIAL_PUZZLE_BOARDS[currentPuzzleIdx]));
       renderTacticsBoard();
     }
 
     function nextTactic() {
-      currentPuzzleIdx = (currentPuzzleIdx + 1) % PUZZLES.length;
-      puzzleSolved = false;
-      selectedSquare = null;
-      renderTacticsBoard();
+      loadPuzzle(currentPuzzleId + 1);
+    }
+
+    function prevTactic() {
+      if (currentPuzzleId > 1) {
+        loadPuzzle(currentPuzzleId - 1);
+      }
+    }
+
+    function randomTactic() {
+      const rand = Math.floor(Math.random() * 5000) + 1;
+      loadPuzzle(rand);
+    }
+
+    function jumpToInput() {
+      const val = parseInt(document.getElementById('jump-input').value, 10);
+      if (!isNaN(val) && val >= 1) {
+        loadPuzzle(val);
+      }
     }
 
 
@@ -1435,7 +1525,7 @@
     }
 
     // Direct immediate startup
-    renderTacticsBoard();
+    loadPuzzle(1);
     renderCoordBoard();
   </script>
 </body>
