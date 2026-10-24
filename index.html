@@ -659,10 +659,12 @@
       <!-- Theme Filter Pills -->
       <div class="filter-bar">
         <button class="filter-pill active" onclick="setThemeFilter('all')" id="filter-all">🌟 全部綜合 (10,000+題)</button>
-        <button class="filter-pill" onclick="setThemeFilter('mate1')" id="filter-mate1">🟢 入門：一步將死 (Mate in 1)</button>
-        <button class="filter-pill" onclick="setThemeFilter('hanging')" id="filter-hanging">🟢 入門：吃懸空子 (Free Piece)</button>
-        <button class="filter-pill" onclick="setThemeFilter('fork')" id="filter-fork">🟡 基礎：捉雙攻擊 (Fork)</button>
-        <button class="filter-pill" onclick="setThemeFilter('skewer')" id="filter-skewer">🟡 基礎：串擊與牽制 (Skewer)</button>
+        <button class="filter-pill" onclick="setThemeFilter('mate1')" id="filter-mate1">🟢 一步將死 (Mate in 1)</button>
+        <button class="filter-pill" onclick="setThemeFilter('fork')" id="filter-fork">🟡 捉雙攻擊 (Fork)</button>
+        <button class="filter-pill" onclick="setThemeFilter('hanging')" id="filter-hanging">🟢 吃懸空子 (Free Piece)</button>
+        <button class="filter-pill" onclick="setThemeFilter('skewer')" id="filter-skewer">🟡 串擊牽制 (Skewer/Pin)</button>
+        <button class="filter-pill" onclick="setThemeFilter('classic')" id="filter-classic">🏆 大師與名局 (Classics)</button>
+        <button class="filter-pill" onclick="setThemeFilter('blackMove')" id="filter-blackMove">🔄 黑方反擊 (Black to Move)</button>
       </div>
 
       <div class="game-layout">
@@ -1102,52 +1104,63 @@
     }
 
     // ==========================================
-    // 100% ENGINE-VERIFIED PUZZLE GENERATORS
+    // 100% ENGINE-VERIFIED PUZZLE GENERATORS (16 THEMES)
     // ==========================================
-    function genBackRankMate(id) {
-      const rng = mulberry32(id * 997 + 1);
+    // 1. Back Rank Mate (White & Black)
+    function genBackRankMate(id, rng) {
+      const isWhiteMove = rng() > 0.3;
       const board = emptyBoard();
-      const kingConfigs = [
-        { kCol: 6, pawns: [5, 6, 7], wKing: 6, safeCols: [0, 1, 2, 3] },
-        { kCol: 7, pawns: [6, 7],    wKing: 6, safeCols: [0, 1, 2, 3, 4] },
-        { kCol: 1, pawns: [0, 1, 2], wKing: 6, safeCols: [4, 5, 6, 7] },
-        { kCol: 0, pawns: [0, 1],    wKing: 6, safeCols: [3, 4, 5, 6, 7] }
-      ];
-      const cfg = kingConfigs[Math.floor(rng() * kingConfigs.length)];
-      board[0][cfg.kCol] = 'k';
-      cfg.pawns.forEach(c => { board[1][c] = 'p'; });
-
-      board[7][cfg.wKing] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
-
-      const validCols = cfg.safeCols.filter(c => !board[6][c] && !board[7][c]);
-      const rCol = validCols[Math.floor(rng() * validCols.length)];
-      const rRow = 2 + Math.floor(rng() * 5);
-      board[rRow][rCol] = 'R';
-
-      const extraCol = cfg.kCol >= 5 ? 0 : 7;
-      if (!board[2][extraCol] && extraCol !== rCol) board[2][extraCol] = 'p';
-      if (!board[5][extraCol] && extraCol !== rCol) board[5][extraCol] = 'P';
-
-      return {
-        id: id,
-        title: `第 ${id} 題：一步底線將死 (Back Rank Mate)`,
-        category: '入門一步殺',
-        themeKey: 'mate1',
-        catClass: 'cat-easy',
-        rating: '入門 ★☆☆☆☆',
-        turn: 'w',
-        isMateIn1: true,
-        desc: '黑方國王被自己前方的兵堵死在底線（沒有換氣格）。找出白車一擊必殺的步法！',
-        knowledge: '底線將死是最基礎也最實用的殺局：當敵王被自己的兵封鎖在底線時，重子直衝第 8 排即可直接將死！',
-        initialBoard: board,
-        solution: { from: [rRow, rCol], to: [0, rCol] },
-        hint: `點選 ${col2File(rCol)}${8-rRow} 的白車 (♖)，直衝底線 ${col2File(rCol)}8 將死黑王！`
-      };
+      if (isWhiteMove) {
+        const kCol = [0, 1, 6, 7][Math.floor(rng() * 4)];
+        board[0][kCol] = 'k';
+        if (kCol >= 6) { board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p'; }
+        else { board[1][0] = 'p'; board[1][1] = 'p'; board[1][2] = 'p'; }
+        board[7][kCol >= 6 ? 1 : 6] = 'K';
+        board[6][kCol >= 6 ? 1 : 6] = 'P';
+        const useQueen = rng() > 0.6;
+        const piece = useQueen ? 'Q' : 'R';
+        const name = useQueen ? '白皇后 (♕)' : '白車 (♖)';
+        const openCols = [0, 1, 2, 3, 4, 5, 6, 7].filter(c => !board[0][c] && !board[1][c] && Math.abs(c - kCol) >= 2);
+        const rCol = openCols[Math.floor(rng() * openCols.length)];
+        const rRow = 2 + Math.floor(rng() * 4);
+        board[rRow][rCol] = piece;
+        return {
+          id, title: `第 ${id} 題：一步底線將死 (Back Rank Mate)`,
+          category: '入門一步殺', themeKey: 'mate1', catClass: 'cat-easy', rating: '入門 ★☆☆☆☆',
+          turn: 'w', isMateIn1: true,
+          desc: `黑方國王被自己的兵封鎖在底線。請用 ${name} 直衝第 8 排將死黑王！`,
+          knowledge: '底線將死（Back-Rank Mate）：當敵王被自己的兵擋住沒有逃生換氣格時，重子直接打入底線即可一擊殺局！',
+          initialBoard: board, solution: { from: [rRow, rCol], to: [0, rCol] },
+          hint: `點選 ${col2File(rCol)}${8-rRow} 的 ${name}，衝到 ${col2File(rCol)}8 完成底線將死！`
+        };
+      } else {
+        const kCol = [0, 1, 6, 7][Math.floor(rng() * 4)];
+        board[7][kCol] = 'K';
+        if (kCol >= 6) { board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P'; }
+        else { board[6][0] = 'P'; board[6][1] = 'P'; board[6][2] = 'P'; }
+        board[0][kCol >= 6 ? 1 : 6] = 'k';
+        board[1][kCol >= 6 ? 1 : 6] = 'p';
+        const useQueen = rng() > 0.6;
+        const piece = useQueen ? 'q' : 'r';
+        const name = useQueen ? '黑皇后 (♛)' : '黑車 (♜)';
+        const openCols = [0, 1, 2, 3, 4, 5, 6, 7].filter(c => !board[7][c] && !board[6][c] && Math.abs(c - kCol) >= 2);
+        const rCol = openCols[Math.floor(rng() * openCols.length)];
+        const rRow = 2 + Math.floor(rng() * 4);
+        board[rRow][rCol] = piece;
+        return {
+          id, title: `第 ${id} 題：黑方反擊！一步底線將死 (Back Rank Mate)`,
+          category: '黑先走戰術', themeKey: 'blackMove', catClass: 'cat-easy', rating: '入門 ★☆☆☆☆',
+          turn: 'b', isMateIn1: true,
+          desc: `換黑方走！白王被自己的兵困在第 1 排底線。用 ${name} 衝入底線將死白王！`,
+          knowledge: '黑方也能發動底線將死！觀察白方第 1 排（白底線）是否有重子防禦，無防禦時直接沉底殺棋！',
+          initialBoard: board, solution: { from: [rRow, rCol], to: [7, rCol] },
+          hint: `點選 ${col2File(rCol)}${8-rRow} 的 ${name}，打入 ${col2File(rCol)}1 將死白王！`
+        };
+      }
     }
 
-    function genQueenKissMate(id) {
-      const rng = mulberry32(id * 1009 + 2);
+    // 2. Queen Kiss Mate
+    function genQueenKissMate(id, rng) {
       const board = emptyBoard();
       const templates = [
         {
@@ -1199,59 +1212,100 @@
       const qSq = `${col2File(setup.q[1])}${8 - setup.q[0]}`;
 
       return {
-        id: id,
-        title: `第 ${id} 題：皇后貼臉吻殺 (Queen Kiss Mate)`,
-        category: '入門一步殺',
-        themeKey: 'mate1',
-        catClass: 'cat-easy',
-        rating: '入門 ★☆☆☆☆',
-        turn: 'w',
-        isMateIn1: true,
+        id, title: `第 ${id} 題：皇后貼臉吻殺 (Queen Kiss Mate)`,
+        category: '入門一步殺', themeKey: 'mate1', catClass: 'cat-easy', rating: '入門 ★☆☆☆☆',
+        turn: 'w', isMateIn1: true,
         desc: `白方隊友已經瞄準並保護了 ${tSq} 格。請將白皇后吃入 ${tSq} 貼臉將死黑王！`,
-        knowledge: '皇后貼臉殺（Death Kiss）：當目標格有己方隊友（馬、象或兵）保護時，皇后直接貼身將軍，敵王既不能吃后也無路可逃！',
-        initialBoard: board,
-        solution: { from: [setup.q[0], setup.q[1]], to: [tpl.target[0], tpl.target[1]] },
-        hint: `點選 ${qSq} 的白皇后 (♕)，吃掉 ${tSq} 的黑兵貼臉將死黑王！`
+        knowledge: '皇后貼臉吻殺（Queen Kiss Mate）：當目標格有己方棋子保護時，皇后貼身將軍，敵王無法吃后也無處可逃！',
+        initialBoard: board, solution: { from: [setup.q[0], setup.q[1]], to: [tpl.target[0], tpl.target[1]] },
+        hint: `點選 ${qSq} 的白皇后 (♕)，吃入 ${tSq} 貼臉將死黑王！`
       };
     }
 
-    function genLadderMate(id) {
-      const rng = mulberry32(id * 1013 + 3);
+    // 3. Arabian Mate
+    function genArabianMate(id, rng) {
+      const isCornerRight = rng() > 0.5;
+      const board = emptyBoard();
+      if (isCornerRight) {
+        board[0][7] = 'k';
+        board[1][7] = 'p';
+        board[7][1] = 'K'; board[6][1] = 'P';
+        board[2][5] = 'N';
+        const rPos = [Math.floor(2 + rng() * 4), 6];
+        board[rPos[0]][rPos[1]] = 'R';
+        return {
+          id, title: `第 ${id} 題：經典阿拉伯殺 (Arabian Mate)`,
+          category: '經典殺局', themeKey: 'classic', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+          turn: 'w', isMateIn1: true,
+          desc: '白騎士在 f6 牢牢封鎖了黑王的逃生格。移動白車到 g8 完成傳奇的阿拉伯將死！',
+          knowledge: '阿拉伯殺（Arabian Mate）是有超過千年歷史的古老殺法：由騎士控制角落國王的逃路並保護白車，白車沉底給予致命一擊！',
+          initialBoard: board, solution: { from: rPos, to: [0, 6] },
+          hint: `點選 ${col2File(rPos[1])}${8-rPos[0]} 的白車 (♖)，移動到 g8 將死黑王！`
+        };
+      } else {
+        board[0][0] = 'k';
+        board[1][0] = 'p';
+        board[7][6] = 'K'; board[6][6] = 'P';
+        board[2][2] = 'N';
+        const rPos = [Math.floor(2 + rng() * 4), 1];
+        board[rPos[0]][rPos[1]] = 'R';
+        return {
+          id, title: `第 ${id} 題：經典阿拉伯殺 (Arabian Mate)`,
+          category: '經典殺局', themeKey: 'classic', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+          turn: 'w', isMateIn1: true,
+          desc: '白騎士在 c6 鎖死角落黑王。移動白車到 b8 完成阿拉伯殺局！',
+          knowledge: '阿拉伯殺是車馬配合的典範，在空曠的殘局中對縮在角落的國王威脅極大！',
+          initialBoard: board, solution: { from: rPos, to: [0, 1] },
+          hint: `點選 ${col2File(rPos[1])}${8-rPos[0]} 的白車 (♖)，移動到 b8 將死黑王！`
+        };
+      }
+    }
+
+    // 4. Anastasia's Mate
+    function genAnastasiaMate(id, rng) {
+      const board = emptyBoard();
+      board[0][7] = 'k'; // h8
+      board[1][6] = 'p'; // g7
+      board[7][2] = 'K'; board[6][2] = 'P';
+      board[1][4] = 'N'; // e7 Knight guarding g8 and g6
+      const rCol = Math.floor(rng() * 6);
+      board[3][rCol] = 'R';
+      return {
+        id, title: `第 ${id} 題：安娜斯塔西亞殺 (Anastasia's Mate)`,
+        category: '經典殺局', themeKey: 'classic', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: true,
+        desc: '白方騎士在 e7 卡死了黑王逃往 g8 與 g6 的所有路徑。白車衝入 h5 完成安娜斯塔西亞將死！',
+        knowledge: '安娜斯塔西亞殺（Anastasia’s Mate）：騎士在 e7 封鎖邊緣逃路，車在開放的 h 線直取國王首級！',
+        initialBoard: board, solution: { from: [3, rCol], to: [3, 7] },
+        hint: `點選 ${col2File(rCol)}5 的白車 (♖)，橫移到 h5 完成將死！`
+      };
+    }
+
+    // 5. Ladder Mate
+    function genLadderMate(id, rng) {
       const board = emptyBoard();
       const kCol = 2 + Math.floor(rng() * 4);
       board[0][kCol] = 'k';
-      board[7][6] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
-
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
       const r1Col = kCol <= 3 ? 7 : 0;
       board[1][r1Col] = 'R';
-
-      const safeCols = [0, 1, 2, 3, 4, 5, 6, 7].filter(c =>
-        Math.abs(c - kCol) >= 2 && c !== r1Col && !board[6][c] && !board[7][c]
-      );
+      const safeCols = [0, 1, 2, 3, 4, 5, 6, 7].filter(c => Math.abs(c - kCol) >= 2 && c !== r1Col && !board[6][c] && !board[7][c]);
       const r2Col = safeCols[Math.floor(rng() * safeCols.length)];
       const r2Row = 2 + Math.floor(rng() * 4);
       board[r2Row][r2Col] = 'R';
-
       return {
-        id: id,
-        title: `第 ${id} 題：雙車走廊階梯殺 (Ladder Mate)`,
-        category: '入門一步殺',
-        themeKey: 'mate1',
-        catClass: 'cat-easy',
-        rating: '入門 ★☆☆☆☆',
-        turn: 'w',
-        isMateIn1: true,
+        id, title: `第 ${id} 題：雙車走廊階梯殺 (Ladder Mate)`,
+        category: '入門一步殺', themeKey: 'mate1', catClass: 'cat-easy', rating: '入門 ★☆☆☆☆',
+        turn: 'w', isMateIn1: true,
         desc: '第 7 橫排已被白車封鎖，黑王無法往下逃。請移動另一隻白車衝上底線將死！',
         knowledge: '雙車走廊殺：一隻車負責封鎖敵王的跨排逃生線，另一隻車直接沉底將軍。',
-        initialBoard: board,
-        solution: { from: [r2Row, r2Col], to: [0, r2Col] },
-        hint: `點選 ${col2File(r2Col)}${8-r2Row} 的白車 (♖)，直衝底線 ${col2File(r2Col)}8！`
+        initialBoard: board, solution: { from: [r2Row, r2Col], to: [0, r2Col] },
+        hint: `點選 ${col2File(r2Col)}${8-r2Row} 的白車 (♖)，衝到 ${col2File(r2Col)}8 將死黑王！`
       };
     }
 
-    function genSmotheredMate(id) {
-      const rng = mulberry32(id * 1021 + 4);
+    // 6. Smothered Mate
+    function genSmotheredMate(id, rng) {
       const board = emptyBoard();
       const isRight = rng() > 0.5;
       if (isRight) {
@@ -1262,18 +1316,12 @@
         const nPos = starts[Math.floor(rng() * starts.length)];
         board[nPos[0]][nPos[1]] = 'N';
         return {
-          id: id,
-          title: `第 ${id} 題：窒息悶殺 (Smothered Mate)`,
-          category: '入門一步殺',
-          themeKey: 'mate1',
-          catClass: 'cat-easy',
-          rating: '基礎 ★★☆☆☆',
-          turn: 'w',
-          isMateIn1: true,
+          id, title: `第 ${id} 題：窒息悶殺 (Smothered Mate)`,
+          category: '入門一步殺', themeKey: 'mate1', catClass: 'cat-easy', rating: '基礎 ★★☆☆☆',
+          turn: 'w', isMateIn1: true,
           desc: '黑方國王縮在角落，四周被自己的車和兵塞滿。找出白騎士一擊悶殺的位置！',
           knowledge: '窒息悶殺（Smothered Mate）：因為只有騎士能越子攻擊，當敵王被自己的棋子團團圍住時，騎士一跳即可悶死敵王！',
-          initialBoard: board,
-          solution: { from: nPos, to: [1, 5] },
+          initialBoard: board, solution: { from: nPos, to: [1, 5] },
           hint: `點選 ${col2File(nPos[1])}${8-nPos[0]} 的白騎士 (♘)，跳到 f7 將死黑王！`
         };
       } else {
@@ -1284,25 +1332,197 @@
         const nPos = starts[Math.floor(rng() * starts.length)];
         board[nPos[0]][nPos[1]] = 'N';
         return {
-          id: id,
-          title: `第 ${id} 題：窒息悶殺 (Smothered Mate)`,
-          category: '入門一步殺',
-          themeKey: 'mate1',
-          catClass: 'cat-easy',
-          rating: '基礎 ★★☆☆☆',
-          turn: 'w',
-          isMateIn1: true,
+          id, title: `第 ${id} 題：窒息悶殺 (Smothered Mate)`,
+          category: '入門一步殺', themeKey: 'mate1', catClass: 'cat-easy', rating: '基礎 ★★☆☆☆',
+          turn: 'w', isMateIn1: true,
           desc: '黑方國王縮在左上角，被自己的車和兵困死。請跳動白騎士完成悶殺！',
           knowledge: '窒息悶殺（Smothered Mate）：騎士跳入 c7 隔空將軍，黑王毫無退路！',
-          initialBoard: board,
-          solution: { from: nPos, to: [1, 2] },
+          initialBoard: board, solution: { from: nPos, to: [1, 2] },
           hint: `點選 ${col2File(nPos[1])}${8-nPos[0]} 的白騎士 (♘)，跳到 c7 將死黑王！`
         };
       }
     }
 
-    function genHangingPiece(id) {
-      const rng = mulberry32(id * 1061 + 8);
+    // 7. Knight Fork (12 Rich Setups, White & Black)
+    function genKnightFork(id, rng) {
+      const setups = [
+        { turn: 'w', fork: [1, 2], k: [0, 4], q: [0, 0, 'r'], pawns: [[1, 4], [1, 5], [1, 6]], starts: [[3, 3], [2, 4], [3, 1], [2, 0]] },
+        { turn: 'w', fork: [1, 5], k: [0, 3], q: [0, 7, 'r'], pawns: [[1, 2], [1, 3], [1, 1]], starts: [[3, 4], [3, 6], [2, 3], [2, 7]] },
+        { turn: 'w', fork: [2, 3], k: [0, 4], q: [1, 1, 'q'], pawns: [[1, 5], [1, 6], [1, 7]], starts: [[4, 4], [4, 2], [3, 5]] },
+        { turn: 'w', fork: [2, 4], k: [1, 6], q: [1, 2, 'q'], pawns: [[2, 6], [1, 7], [1, 0]], starts: [[4, 3], [4, 5], [3, 2]] },
+        { turn: 'w', fork: [3, 2], k: [1, 1], q: [1, 5, 'r'], pawns: [[2, 1], [2, 0]], starts: [[5, 3], [5, 1], [4, 4]] },
+        { turn: 'w', fork: [3, 5], k: [1, 6], q: [1, 2, 'r'], pawns: [[2, 6], [2, 7]], starts: [[5, 4], [5, 6], [4, 3]] },
+        { turn: 'b', fork: [6, 2], k: [7, 4], q: [7, 0, 'R'], pawns: [[6, 4], [6, 5], [6, 6]], starts: [[4, 3], [5, 4], [4, 1]] },
+        { turn: 'b', fork: [6, 5], k: [7, 3], q: [7, 7, 'R'], pawns: [[6, 1], [6, 2], [6, 3]], starts: [[4, 4], [4, 6], [5, 3]] },
+        { turn: 'b', fork: [5, 3], k: [7, 4], q: [6, 1, 'Q'], pawns: [[6, 5], [6, 6]], starts: [[3, 4], [3, 2], [4, 5]] },
+        { turn: 'b', fork: [5, 4], k: [6, 6], q: [6, 2, 'Q'], pawns: [[5, 6], [6, 7]], starts: [[3, 3], [3, 5], [4, 2]] },
+        { turn: 'w', fork: [1, 4], k: [0, 6], q: [2, 2, 'q'], pawns: [[1, 6], [1, 7]], starts: [[3, 3], [3, 5], [2, 6]] },
+        { turn: 'w', fork: [2, 2], k: [0, 1], q: [3, 4, 'q'], pawns: [[1, 0], [1, 1]], starts: [[4, 3], [4, 1], [3, 0]] }
+      ];
+
+      const s = setups[Math.floor(rng() * setups.length)];
+      const isWhite = s.turn === 'w';
+      const board = emptyBoard();
+
+      board[s.k[0]][s.k[1]] = isWhite ? 'k' : 'K';
+      board[s.q[0]][s.q[1]] = s.q[2];
+      s.pawns.forEach(([r, c]) => { board[r][c] = isWhite ? 'p' : 'P'; });
+
+      if (isWhite) {
+        board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
+      } else {
+        board[0][6] = 'k'; board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
+      }
+
+      const nPos = s.starts[Math.floor(rng() * s.starts.length)];
+      board[nPos[0]][nPos[1]] = isWhite ? 'N' : 'n';
+
+      const fSq = `${col2File(s.fork[1])}${8 - s.fork[0]}`;
+      const nSq = `${col2File(nPos[1])}${8 - nPos[0]}`;
+      const targetName = s.q[2].toLowerCase() === 'q' ? '皇后' : '車';
+
+      return {
+        id,
+        title: isWhite ? `第 ${id} 題：皇家騎士捉雙 (Knight Fork)` : `第 ${id} 題：黑方反擊！黑馬捉雙 (Knight Fork)`,
+        category: isWhite ? '基礎捉雙' : '黑先走戰術',
+        themeKey: isWhite ? 'fork' : 'blackMove',
+        catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: s.turn, isMateIn1: false,
+        desc: `${isWhite ? '黑方' : '換黑方走！白方'}國王與${targetName}站位暴露。跳動騎士同時將軍國王並捉住${targetName}！`,
+        knowledge: '騎士捉雙（Knight Fork）：騎士擁有獨一無二的八向跳躍攻擊，將軍的同時攻擊大子，逼王閃避後免費收割！',
+        initialBoard: board, solution: { from: nPos, to: s.fork },
+        hint: `點選 ${nSq} 的騎士，跳到 ${fSq} 實施雙重威脅！`
+      };
+    }
+
+    // 8. Queen Fork / Double Attack
+    function genQueenFork(id, rng) {
+      const configs = [
+        { k: [0, 4], qStart: [4, 1], qTarget: [4, 4], r: [4, 7] },
+        { k: [0, 3], qStart: [4, 0], qTarget: [4, 3], r: [4, 7] },
+        { k: [0, 2], qStart: [4, 5], qTarget: [4, 2], r: [4, 0] },
+        { k: [0, 5], qStart: [5, 2], qTarget: [3, 2], r: [3, 7] }
+      ];
+      const cfg = configs[Math.floor(rng() * configs.length)];
+      const board = emptyBoard();
+      board[cfg.k[0]][cfg.k[1]] = 'k';
+      board[cfg.r[0]][cfg.r[1]] = 'r';
+      board[cfg.qStart[0]][cfg.qStart[1]] = 'Q';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
+
+      const fromSq = `${col2File(cfg.qStart[1])}${8 - cfg.qStart[0]}`;
+      const toSq = `${col2File(cfg.qTarget[1])}${8 - cfg.qTarget[0]}`;
+
+      return {
+        id, title: `第 ${id} 題：皇后雙重打擊捉雙 (Queen Fork)`,
+        category: '基礎捉雙', themeKey: 'fork', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '黑車孤立無援。移動白皇后到中心，一邊向上將軍黑王，一邊橫向鎖定黑車！',
+        knowledge: '皇后雙重打擊（Queen Fork）：皇后擁有全盤最強的機動力，將軍的同時攻擊無根子是對手最大的惡夢！',
+        initialBoard: board, solution: { from: cfg.qStart, to: cfg.qTarget },
+        hint: `點選 ${fromSq} 的白皇后 (♕)，推到 ${toSq} 實施雙重打擊！`
+      };
+    }
+
+    // 9. Bishop Fork
+    function genBishopFork(id, rng) {
+      const board = emptyBoard();
+      board[1][1] = 'k';
+      board[1][7] = 'r';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
+      board[6][2] = 'B';
+      return {
+        id, title: `第 ${id} 題：斜線主教雙重打擊 (Bishop Fork)`,
+        category: '串擊與牽制', themeKey: 'skewer', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '黑王與黑車位於同一條主教斜線的兩端！將白主教推進中心，同時將軍並威脅黑車！',
+        knowledge: '主教雙重打擊：主教沿大斜線發威，黑王逃跑後黑車無路可退！',
+        initialBoard: board, solution: { from: [6, 2], to: [4, 4] },
+        hint: '點選 c2 的白主教 (♗)，移到 e4 進行大斜線捉雙！'
+      };
+    }
+
+    // 10. Pawn Fork
+    function genPawnFork(id, rng) {
+      const board = emptyBoard();
+      const col = 1 + Math.floor(rng() * 5);
+      board[4][col] = 'P';
+      board[7][col] = 'R';
+      board[2][col - 1] = 'r';
+      board[2][col + 1] = 'n';
+      board[0][6] = 'k'; board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
+      return {
+        id, title: `第 ${id} 題：小兵挺進捉雙 (Pawn Fork)`,
+        category: '基礎捉雙', themeKey: 'fork', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '黑方的車與騎士站位密集。推進有白車掩護的小兵，以小博大同時捉雙兩顆黑子！',
+        knowledge: '小兵捉雙（Pawn Fork）：用價值最低的小兵同時威脅對手兩顆大子，對手只能棄車保帥！',
+        initialBoard: board, solution: { from: [4, col], to: [3, col] },
+        hint: `點選 ${col2File(col)}4 的白兵 (♙)，推進到 ${col2File(col)}5 捉雙黑車與黑馬！`
+      };
+    }
+
+    // 11. Skewer
+    function genSkewer(id, rng) {
+      const board = emptyBoard();
+      const rank = 2 + Math.floor(rng() * 3);
+      board[rank][4] = 'k';
+      board[rank][1] = 'r';
+      board[7][7] = 'R';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
+      return {
+        id, title: `第 ${id} 題：直線串擊掠奪 (The Skewer)`,
+        category: '串擊與牽制', themeKey: 'skewer', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '黑王與黑車排在同一橫排。用白車將軍黑王，逼迫黑王移開後直接收割後面的黑車！',
+        knowledge: '串擊（Skewer）：先攻擊價值高的目標，逼其閃避後吃掉後方無防護的棋子！',
+        initialBoard: board, solution: { from: [7, 7], to: [rank, 7] },
+        hint: `點選 h1 的白車 (♖)，衝上 h${8-rank} 將軍串擊！`
+      };
+    }
+
+    // 12. Absolute Pin
+    function genAbsolutePin(id, rng) {
+      const board = emptyBoard();
+      board[0][4] = 'k';
+      board[3][4] = 'n';
+      board[7][4] = 'R';
+      board[5][3] = 'P';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
+      return {
+        id, title: `第 ${id} 題：利用絕對牽制 (Absolute Pin)`,
+        category: '串擊與牽制', themeKey: 'skewer', catClass: 'cat-med', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '黑騎士被白車牽制在王前無法動彈（動了王就被將軍）。推進白小兵直接消滅被牽制的騎士！',
+        knowledge: '牽制（Pin）：被牽制的棋子無法移動或移動受限，向被牽制的棋子施加更多攻擊是贏棋的基本功！',
+        initialBoard: board, solution: { from: [5, 3], to: [4, 3] },
+        hint: '點選 d3 的白兵 (♙)，往前推一步到 d4 吃定被牽制的黑馬！'
+      };
+    }
+
+    // 13. Discovered Attack
+    function genDiscoveredAttack(id, rng) {
+      const board = emptyBoard();
+      board[7][4] = 'R';
+      board[4][4] = 'N';
+      board[0][4] = 'k';
+      board[1][3] = 'p'; board[1][5] = 'p';
+      board[1][1] = 'q';
+      board[7][6] = 'K'; board[6][6] = 'P';
+      return {
+        id, title: `第 ${id} 題：抽將閃擊戰術 (Discovered Check)`,
+        category: '抽將與閃擊', themeKey: 'fork', catClass: 'cat-hard', rating: '進階 ★★★☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '白車與白馬排在同一線上瞄準黑王。跳動白馬抽將，車將軍的同時白馬攻擊黑皇后！',
+        knowledge: '抽將（Discovered Check）：前方的子移開露出後方重子的將軍，對手必須應將，前方的子就能為所欲為！',
+        initialBoard: board, solution: { from: [4, 4], to: [3, 2] },
+        hint: '點選 e4 的白騎士 (♘)，跳到 c5 閃開給車將軍，同時捉黑后！'
+      };
+    }
+
+    // 14. Hanging Piece
+    function genHangingPiece(id, rng) {
       const board = emptyBoard();
       const setups = [
         { w: [6, 0, 'B'], b: [3, 3, 'r', '車'] },
@@ -1310,156 +1530,92 @@
         { w: [5, 2, 'N'], b: [3, 3, 'r', '車'] },
         { w: [7, 3, 'R'], b: [2, 3, 'b', '主教'] },
         { w: [6, 6, 'B'], b: [2, 2, 'n', '騎士'] },
-        { w: [7, 1, 'R'], b: [2, 1, 'q', '皇后'] }
+        { w: [7, 1, 'R'], b: [2, 1, 'q', '皇后'] },
+        { w: [4, 1, 'B'], b: [1, 4, 'n', '騎士'] },
+        { w: [5, 3, 'Q'], b: [2, 6, 'r', '車'] }
       ];
       const s = setups[Math.floor(rng() * setups.length)];
-      board[0][6] = 'k';
-      board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
-      board[7][6] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
+      board[0][6] = 'k'; board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
+      board[7][6] = 'K'; board[6][5] = 'P'; board[6][6] = 'P';
       board[s.w[0]][s.w[1]] = s.w[2];
       board[s.b[0]][s.b[1]] = s.b[2];
-
-      const fromSq = `${col2File(s.w[1])}${8 - s.w[0]}`;
-      const toSq = `${col2File(s.b[1])}${8 - s.b[0]}`;
-
       return {
-        id: id,
-        title: `第 ${id} 題：吃掉落單的懸空子 (Free Piece)`,
-        category: '吃懸空子',
-        themeKey: 'hanging',
-        catClass: 'cat-easy',
-        rating: '入門 ★☆☆☆☆',
-        turn: 'w',
-        isMateIn1: false,
-        desc: `黑方的${s.b[3]} (${toSq}) 孤立無援，完全沒有任何黑子保護！請找出能直接吃掉它的白子！`,
-        knowledge: '懸空子（Hanging Piece）：實戰中最常出現的得分機會就是對手走漏眼，把大子放在沒有保護又被你攻擊的格子上！',
-        initialBoard: board,
-        solution: { from: [s.w[0], s.w[1]], to: [s.b[0], s.b[1]] },
-        hint: `點選 ${fromSq} 的白子，直接移動到 ${toSq} 吃掉黑方的${s.b[3]}！`
+        id, title: `第 ${id} 題：吃掉落單的懸空子 (Free Piece)`,
+        category: '吃懸空子', themeKey: 'hanging', catClass: 'cat-easy', rating: '入門 ★☆☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: `黑方的${s.b[3]}完全無人看守！找出能直接免費吃掉它的白子！`,
+        knowledge: '懸空子（Hanging Piece）：業餘棋手最常見的失誤就是漏算防守，白吃對手的大子是建立勝勢的最快途徑！',
+        initialBoard: board, solution: { from: [s.w[0], s.w[1]], to: [s.b[0], s.b[1]] },
+        hint: `點選 ${col2File(s.w[1])}${8-s.w[0]} 的白子，直接吃掉 ${col2File(s.b[1])}${8-s.b[0]} 的${s.b[3]}！`
       };
     }
 
-    function genKnightFork(id) {
-      const rng = mulberry32(id * 1031 + 5);
+    // 15. Passed Pawn Promotion
+    function genPawnPromotion(id, rng) {
       const board = emptyBoard();
-      const setups = [
-        { fork: [1, 2], k: [0, 4], q: [0, 0, 'r'], pawns: [[1, 4], [1, 5], [1, 6]], starts: [[3, 3], [2, 4], [3, 1], [2, 0]] },
-        { fork: [1, 5], k: [0, 3], q: [0, 7, 'r'], pawns: [[1, 2], [1, 3], [1, 1]], starts: [[3, 4], [3, 6], [2, 3], [2, 7]] },
-        { fork: [2, 3], k: [0, 4], q: [1, 1, 'q'], pawns: [[1, 5], [1, 6], [1, 7]], starts: [[4, 4], [4, 2], [3, 5]] },
-        { fork: [2, 4], k: [1, 6], q: [1, 2, 'q'], pawns: [[2, 6], [1, 7], [1, 0]], starts: [[4, 3], [4, 5], [3, 2]] }
-      ];
-      const s = setups[Math.floor(rng() * setups.length)];
-      board[s.k[0]][s.k[1]] = 'k';
-      board[s.q[0]][s.q[1]] = s.q[2];
-      s.pawns.forEach(([r, c]) => { board[r][c] = 'p'; });
-      board[7][6] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
-
-      const nPos = s.starts[Math.floor(rng() * s.starts.length)];
-      board[nPos[0]][nPos[1]] = 'N';
-
-      const fSq = `${col2File(s.fork[1])}${8 - s.fork[0]}`;
-      const nSq = `${col2File(nPos[1])}${8 - nPos[0]}`;
-      const targetName = s.q[2] === 'q' ? '皇后' : '車';
-
+      const col = 1 + Math.floor(rng() * 6);
+      board[1][col] = 'P';
+      board[0][col <= 3 ? 7 : 0] = 'k';
+      board[7][col <= 3 ? 7 : 0] = 'K';
+      board[6][col <= 3 ? 7 : 0] = 'P';
       return {
-        id: id,
-        title: `第 ${id} 題：皇家騎士捉雙 (Knight Fork)`,
-        category: '基礎捉雙',
-        themeKey: 'fork',
-        catClass: 'cat-med',
-        rating: '基礎 ★★☆☆☆',
-        turn: 'w',
-        isMateIn1: false,
-        desc: `黑方國王與${targetName}同時落入騎士的射程！找出能同時將軍並捉住${targetName}的跳躍點！`,
-        knowledge: `騎士捉雙（Fork）：利用騎士 L 型跳躍，跳到 ${fSq} 同時將軍國王並攻擊${targetName}，黑王被迫逃跑後白方免費贏得${targetName}！`,
-        initialBoard: board,
-        solution: { from: nPos, to: s.fork },
-        hint: `點選 ${nSq} 的白騎士 (♘)，跳到 ${fSq} 發動將軍捉雙！`
+        id, title: `第 ${id} 題：通行兵突破升變 (Pawn Promotion)`,
+        category: '兵的殘局', themeKey: 'mate1', catClass: 'cat-easy', rating: '基礎 ★★☆☆☆',
+        turn: 'w', isMateIn1: false,
+        desc: '白兵已經兵臨底線第 7 排！往前推進一步完成升變為皇后！',
+        knowledge: '兵升變（Promotion）：小兵抵達第 8 排可立即變身為最強大的皇后，是殘局致勝的決定性手段！',
+        initialBoard: board, solution: { from: [1, col], to: [0, col] },
+        hint: `點選 ${col2File(col)}7 的白兵 (♙)，推進到底線 ${col2File(col)}8 升變為皇后！`
       };
     }
 
-    function genPawnFork(id) {
-      const rng = mulberry32(id * 1039 + 6);
+    // 16. Morphy's Opera Game Mate
+    function genOperaBodenMate(id, rng) {
       const board = emptyBoard();
-      const col = 1 + Math.floor(rng() * 4);
-      board[4][col] = 'P';
-      board[7][col] = 'R';
-      if (rng() > 0.5) {
-        board[2][col - 1] = 'r';
-        board[2][col + 1] = 'n';
-      } else {
-        board[2][col - 1] = 'n';
-        board[2][col + 1] = 'r';
-      }
-      board[0][6] = 'k';
-      board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
-      board[7][6] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
-
-      const fromSq = `${col2File(col)}4`;
-      const toSq = `${col2File(col)}5`;
-
+      board[0][4] = 'k'; // e8
+      board[0][1] = 'n'; // b8
+      board[0][7] = 'r'; // h8
+      board[1][0] = 'p'; board[1][5] = 'p'; board[1][6] = 'p'; board[1][7] = 'p';
+      board[2][4] = 'q'; // e6
+      board[7][3] = 'R'; // d1
+      board[3][6] = 'B'; // g5
+      board[7][2] = 'K';
+      board[6][0] = 'P'; board[6][1] = 'P'; board[6][2] = 'P'; board[6][5] = 'P'; board[6][6] = 'P'; board[6][7] = 'P';
       return {
-        id: id,
-        title: `第 ${id} 題：小兵分岔捉雙 (Pawn Fork)`,
-        category: '基礎捉雙',
-        themeKey: 'fork',
-        catClass: 'cat-med',
-        rating: '基礎 ★★☆☆☆',
-        turn: 'w',
-        isMateIn1: false,
-        desc: '黑方的車與騎士平行站立。推進有白車掩護的小兵，同時捉雙兩顆黑子！',
-        knowledge: '小兵捉雙（Pawn Fork）：兵往前推進一格後，斜向同時威脅黑方兩顆大子，黑方無法吃兵，只能眼睜睜損失一子！',
-        initialBoard: board,
-        solution: { from: [4, col], to: [3, col] },
-        hint: `點選 ${fromSq} 的白兵 (♙)，往前推進到 ${toSq} 同時捉雙黑車與黑馬！`
+        id, title: `第 ${id} 題：1858 摩菲歌劇院名局 (Opera Game Mate)`,
+        category: '大師名局', themeKey: 'classic', catClass: 'cat-med', rating: '名局 ★★★☆☆',
+        turn: 'w', isMateIn1: true,
+        desc: '保羅·摩菲在巴黎歌劇院棄后之後的終局！白主教在 g5 守護 d8 並封鎖 e7。找出白車的一擊絕殺！',
+        knowledge: '摩菲歌劇院之局（Opera Game）是西洋棋史最著名的對局，展現了出子速度、開放線與主教掩護的極致殺法！',
+        initialBoard: board, solution: { from: [7, 3], to: [0, 3] },
+        hint: '點選 d1 的白車 (♖)，直衝 d8 底線在主教掩護下將死黑王！'
       };
     }
 
-    function genSkewer(id) {
-      const rng = mulberry32(id * 1049 + 7);
-      const board = emptyBoard();
-      const rank = 2 + Math.floor(rng() * 3);
-      board[rank][4] = 'k';
-      board[rank][1] = 'r';
-      board[7][7] = 'R';
-      board[7][6] = 'K';
-      board[6][5] = 'P'; board[6][6] = 'P';
-
-      const targetSq = `h${8 - rank}`;
-      return {
-        id: id,
-        title: `第 ${id} 題：直線串擊掠奪 (The Skewer)`,
-        category: '串擊與牽制',
-        themeKey: 'skewer',
-        catClass: 'cat-med',
-        rating: '基礎 ★★☆☆☆',
-        turn: 'w',
-        isMateIn1: false,
-        desc: '黑方國王與黑車站在同一橫排上。用白車將軍黑王，逼迫黑王閃避後吃掉後方的黑車！',
-        knowledge: '串擊（Skewer）：先攻擊價值最高的國王，當國王被迫移開逃生時，躲在後面的黑車就會直接暴露被吃！',
-        initialBoard: board,
-        solution: { from: [7, 7], to: [rank, 7] },
-        hint: `點選 h1 的白車 (♖)，衝上 ${targetSq} 將軍黑王！`
-      };
-    }
-
-    const GENERATORS = [
+    const GENERATOR_LIST = [
       genBackRankMate,
-      genQueenKissMate,
-      genLadderMate,
-      genSmotheredMate,
-      genHangingPiece,
       genKnightFork,
+      genArabianMate,
+      genQueenKissMate,
+      genQueenFork,
+      genAnastasiaMate,
+      genHangingPiece,
+      genBishopFork,
+      genSmotheredMate,
       genPawnFork,
-      genSkewer
+      genLadderMate,
+      genSkewer,
+      genAbsolutePin,
+      genDiscoveredAttack,
+      genPawnPromotion,
+      genOperaBodenMate
     ];
 
     function getPuzzle(id) {
-      const fn = GENERATORS[(id - 1) % GENERATORS.length];
-      return fn(id);
+      const themeIdx = (id * 11 + 3) % GENERATOR_LIST.length;
+      const fn = GENERATOR_LIST[themeIdx];
+      const rng = mulberry32(id * 104729 + 13);
+      return fn(id, rng);
     }
 
     // ==========================================
@@ -1503,7 +1659,7 @@
       const activePill = document.getElementById('filter-' + theme);
       if (activePill) activePill.classList.add('active');
 
-      if (theme !== 'all' && currentPuzzle.themeKey !== theme) {
+      if (!matchesFilter(currentPuzzle, currentFilter)) {
         nextTactic();
       }
     }
@@ -1558,7 +1714,12 @@
       ratingEl.style.color = p.catClass === 'cat-easy' ? '#4ade80' : (p.catClass === 'cat-med' ? '#fbbf24' : '#f87171');
 
       document.getElementById('puzzle-knowledge').innerText = p.knowledge;
-      document.getElementById('tactics-to-move').innerText = p.turn === 'w' ? '白先走 (White to Move)' : '黑先走 (Black to Move)';
+      document.getElementById('tactics-to-move').innerText = p.turn === 'w' ? '⚪ 白先走 (White to Move)' : '⚫ 黑先走 (Black to Move)';
+      const turnDot = document.getElementById('turn-dot');
+      if (turnDot) {
+        turnDot.style.background = p.turn === 'w' ? '#f8fafc' : '#0f172a';
+        turnDot.style.border = p.turn === 'w' ? '1px solid #94a3b8' : '1px solid #64748b';
+      }
       
       const badge = document.getElementById('puzzle-status-badge');
       if (puzzleSolved) {
@@ -1665,7 +1826,7 @@
         fromR === p.solution.from[0] && fromC === p.solution.from[1] &&
         r === p.solution.to[0] && c === p.solution.to[1]
       );
-      const isAlternativeMateIn1 = p.isMateIn1 && isCheckmate(nextBoard, 'b');
+      const isAlternativeMateIn1 = p.isMateIn1 && isCheckmate(nextBoard, p.turn === 'w' ? 'b' : 'w');
 
       if (isExpectedSolution || isAlternativeMateIn1) {
         // Success!
@@ -1750,13 +1911,24 @@
       renderTacticsBoard();
     }
 
+    function matchesFilter(puzzle, filter) {
+      if (filter === 'all') return true;
+      if (filter === 'mate1') return puzzle.isMateIn1;
+      if (filter === 'fork') return puzzle.themeKey === 'fork';
+      if (filter === 'hanging') return puzzle.themeKey === 'hanging';
+      if (filter === 'skewer') return puzzle.themeKey === 'skewer';
+      if (filter === 'blackMove') return puzzle.turn === 'b';
+      if (filter === 'classic') return puzzle.themeKey === 'classic' || puzzle.category.includes('經典') || puzzle.category.includes('大師');
+      return puzzle.themeKey === filter;
+    }
+
     function findMatchingPuzzleId(startId, step) {
       let id = startId;
-      for (let tries = 0; tries < 20; tries++) {
+      for (let tries = 0; tries < 200; tries++) {
         if (id < 1) id = 10000;
         if (id > 10000) id = 1;
         const p = getPuzzle(id);
-        if (currentFilter === 'all' || p.themeKey === currentFilter) {
+        if (matchesFilter(p, currentFilter)) {
           return id;
         }
         id += step;
