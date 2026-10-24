@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>西洋棋技巧全方位訓練平台 | Chess Training Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .chess-board {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 1 / 1;
+      border: 4px solid #4a3b32;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      user-select: none;
+    }
+    .square {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      font-size: clamp(24px, 6vw, 42px);
+      transition: background-color 0.15s ease;
+    }
+    .sq-light { background-color: #eedca5; }
+    .sq-dark { background-color: #a07855; }
+    .sq-selected { background-color: #baca44 !important; }
+    .sq-target { background-color: #f7e65d !important; }
+    .sq-hint::after {
+      content: '';
+      position: absolute;
+      width: 28%;
+      height: 28%;
+      background-color: rgba(0, 0, 0, 0.22);
+      border-radius: 50%;
+    }
+    .sq-capture::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border: 4px solid rgba(220, 38, 38, 0.45);
+      border-radius: 50%;
+    }
+    .sq-correct { animation: pulse-green 0.6s ease; }
+    .sq-wrong { animation: shake-red 0.5s ease; }
+    @keyframes pulse-green {
+      0%, 100% { background-color: inherit; }
+      50% { background-color: #86efac !important; }
+    }
+    @keyframes shake-red {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); background-color: #fca5a5; }
+      40%, 80% { transform: translateX(4px); background-color: #fca5a5; }
+    }
+    .piece {
+      cursor: grab;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+      line-height: 1;
+      transition: transform 0.1s ease;
+    }
+    .piece:active { cursor: grabbing; transform: scale(1.1); }
+    .piece-white { color: #ffffff; text-shadow: 0 1px 2px #000, 0 0 1px #000; }
+    .piece-black { color: #1e1e1e; text-shadow: 0 1px 1px rgba(255,255,255,0.4); }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">♞</span>
+        <div>
+          <h1 class="text-xl font-bold text-amber-400">ChessMaster 練習工坊</h1>
+          <p class="text-xs text-slate-400">西洋棋題目練習與技巧提升迷你遊戲訓練室</p>
+        </div>
+      </div>
+      <!-- Tab Navigation -->
+      <nav class="flex flex-wrap gap-2">
+        <button onclick="switchTab('tactics')" id="tab-tactics" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-amber-500 text-slate-900 shadow">
+          🎯 戰術謎題
+        </button>
+        <button onclick="switchTab('coordinates')" id="tab-coordinates" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600">
+          ⚡ 棋盤座標直覺
+        </button>
+        <button onclick="switchTab('knight')" id="tab-knight" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600">
+          🐴 騎士走法路徑
+        </button>
+        <button onclick="switchTab('guide')" id="tab-guide" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-slate-700 text-slate-300 hover:bg-slate-600">
+          📚 實戰技巧與訓練法
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-6xl mx-auto w-full p-4 sm:p-6 flex-grow">
+
+    <!-- 1. TACTICS TAB -->
+    <div id="section-tactics" class="tab-content grid lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-3 max-w-[480px]">
+          <div class="flex items-center gap-2">
+            <span id="turn-indicator" class="inline-block w-3.5 h-3.5 rounded-full bg-white border border-slate-400"></span>
+            <span id="tactics-to-move" class="font-semibold text-sm">白先走 (White to Move)</span>
+          </div>
+          <span id="tactics-category" class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-500/30">
+            戰術：牽制 (Pin)
+          </span>
+        </div>
+
+        <!-- The Chess Board -->
+        <div id="tactics-board" class="chess-board"></div>
+
+        <div class="w-full max-w-[480px] flex justify-between mt-3 text-xs text-slate-400">
+          <span>題目 <span id="puzzle-index">1</span> / <span id="puzzle-total">7</span></span>
+          <span id="puzzle-rating">難度評分: 800 - 入門</span>
+        </div>
+      </div>
+
+      <!-- Puzzle Panel & Explanation -->
+      <div class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col gap-4">
+        <div>
+          <div class="flex justify-between items-center">
+            <h2 id="puzzle-title" class="text-lg font-bold text-amber-400">第 1 題：底線悶殺 (Back Rank Mate)</h2>
+            <span id="puzzle-status-badge" class="text-xs px-2.5 py-1 rounded font-medium bg-slate-700 text-slate-300">思考中</span>
+          </div>
+          <p id="puzzle-desc" class="text-sm text-slate-300 mt-2">
+            黑方底線無人守護且國王被自己的兵擋住。請找出白方能一擊必殺的最強步法！
+          </p>
+        </div>
+
+        <div id="puzzle-feedback" class="p-3.5 rounded-lg bg-slate-700/60 border border-slate-600 text-sm hidden">
+          <!-- Dynamic feedback -->
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="hintTactic()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition text-amber-300 border border-amber-500/30">
+            💡 戰術提示
+          </button>
+          <button onclick="resetTactic()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition">
+            🔄 重來此題
+          </button>
+          <button onclick="nextTactic()" id="btn-next-puzzle" class="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold transition">
+            下一題 ➡️
+          </button>
+        </div>
+
+        <div class="border-t border-slate-700 pt-3">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">本題戰術要點：</h3>
+          <p id="puzzle-knowledge" class="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+            底線將死是西洋棋中最常見的戰術模式之一。當國王前方的兵（f, g, h兵）未推動提供逃跑格（Luft / 換氣窗）時，重子（車或后）沉底可直接將死。
+          </p>
+        </div>
+
+        <div class="mt-2 bg-slate-900/40 p-3 rounded-lg border border-slate-700/40">
+          <h4 class="text-xs font-bold text-amber-400/90 mb-1">如何操作？</h4>
+          <p class="text-xs text-slate-400">點擊你要移動的棋子，接著點擊高亮顯示的目標格子即可落子。</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 2. COORDINATES TAB -->
+    <div id="section-coordinates" class="tab-content hidden grid lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-3 max-w-[480px]">
+          <span class="text-sm font-medium text-slate-300">請在棋盤上迅速點擊目標格子</span>
+          <span id="coord-perspective" class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">視角：白方</span>
+        </div>
+
+        <div id="coord-board" class="chess-board"></div>
+
+        <div class="w-full max-w-[480px] flex justify-between mt-3 text-xs text-slate-400">
+          <span>a-h：橫向座標 (Files)</span>
+          <span>1-8：縱向座標 (Ranks)</span>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-amber-400">⚡ 30 秒棋盤盲點極速辨識</h2>
+          <p class="text-sm text-slate-300 mt-1">
+            頂尖大師具備如反射般的棋盤空間感。在 30 秒內盡可能點對更多的座標格子！
+          </p>
+        </div>
+
+        <!-- Target Box -->
+        <div class="bg-slate-900 border-2 border-amber-500/50 rounded-xl p-6 text-center shadow-inner">
+          <div class="text-xs uppercase text-slate-400 mb-1">當前目標格子</div>
+          <div id="target-coord" class="text-5xl font-extrabold text-amber-400 tracking-wider">--</div>
+          <div id="coord-feedback-msg" class="text-xs mt-2 text-slate-400 h-4">準備好後點擊開始！</div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="bg-slate-700/60 p-3 rounded-lg border border-slate-600">
+            <div class="text-xs text-slate-400">剩餘時間</div>
+            <div id="coord-timer" class="text-2xl font-bold text-emerald-400">30s</div>
+          </div>
+          <div class="bg-slate-700/60 p-3 rounded-lg border border-slate-600">
+            <div class="text-xs text-slate-400">答對題數</div>
+            <div id="coord-score" class="text-2xl font-bold text-amber-300">0</div>
+          </div>
+          <div class="bg-slate-700/60 p-3 rounded-lg border border-slate-600">
+            <div class="text-xs text-slate-400">最佳連擊</div>
+            <div id="coord-streak" class="text-2xl font-bold text-indigo-400">0</div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="btn-start-coord" onclick="startCoordGame()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg transition shadow-md">
+            ▶️ 開始挑戰
+          </button>
+          <button onclick="toggleCoordOrientation()" class="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-lg transition">
+            🔄 旋轉黑方
+          </button>
+        </div>
+
+        <div class="bg-slate-900/50 p-3 rounded-lg text-xs text-slate-400 leading-relaxed border border-slate-700/50">
+          💡 <strong>記憶口訣：</strong>「右下角永遠是白格」(White on right)。白方第 1-2 橫線在己方，黑方在第 7-8 橫線。練習到不看邊框標註就能 0.2 秒直覺反應！
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 3. KNIGHT JUMP TAB -->
+    <div id="section-knight" class="tab-content hidden grid lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-3 max-w-[480px]">
+          <span class="text-sm font-medium text-slate-300">操控騎士（馬），以最少步數吃掉所有星星 ⭐</span>
+          <span id="knight-step-count" class="text-xs bg-slate-700 text-amber-300 px-2 py-0.5 rounded font-mono">步數: 0</span>
+        </div>
+
+        <div id="knight-board" class="chess-board"></div>
+
+        <div class="w-full max-w-[480px] flex justify-between mt-3 text-xs text-slate-400">
+          <span>騎士走法：兩格直、一格橫（日字形）</span>
+          <span>騎士每次跳躍必然改變所站格子的顏色！</span>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-amber-400">🐴 騎士跳躍軌跡計算</h2>
+          <p class="text-sm text-slate-300 mt-1">
+            騎士是棋盤上唯一能「躍過」其他棋子的兵種，也是新手最難預判攻擊範圍的棋子。
+          </p>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-4 flex flex-col gap-2">
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-slate-400">剩餘目標星：</span>
+            <span id="knight-stars-left" class="font-bold text-amber-400 text-lg">3 ⭐</span>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-slate-400">當前關卡：</span>
+            <span id="knight-level" class="font-bold text-indigo-400">第 1 關 / 共 3 關</span>
+          </div>
+          <div id="knight-msg" class="text-xs text-emerald-400 min-h-[1.25rem] font-medium">
+            點選綠色高亮格以跳動騎士！
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="resetKnightGame()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition">
+            🔄 重置本關
+          </button>
+          <button onclick="nextKnightLevel()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg text-sm font-semibold transition">
+            下一關 ➡️
+          </button>
+        </div>
+
+        <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 text-xs text-slate-300 leading-relaxed">
+          <h4 class="font-bold text-amber-400 mb-1.5">🎓 騎士實戰核心幾何學定理：</h4>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li><strong>顏色轉換性：</strong>白格跳黑格，黑格跳白格。如果目標與你在同色格，你<strong>不可能在單數步（1步、3步）</strong>跳到它！</li>
+            <li><strong>控制中心：</strong>在中心格（如 d4/e4），騎士最多能控制 8 個格子；在邊緣（a4）只控 4 格；在角端（a1）僅控 2 格（「馬跳邊緣易受制」）。</li>
+            <li><strong>捉雙狂魔 (Fork)：</strong>因其特殊的幾何跳法，極易同時攻擊敵方國王與皇后。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 4. GUIDE & TRAINING METHODS TAB -->
+    <div id="section-guide" class="tab-content hidden space-y-6">
+      <!-- Banner -->
+      <div class="bg-gradient-to-r from-amber-600/30 to-indigo-900/40 border border-amber-500/30 rounded-2xl p-6">
+        <h2 class="text-2xl font-bold text-amber-300 mb-2">🏆 從入門到業餘高手的系統化進階地圖</h2>
+        <p class="text-slate-300 text-sm leading-relaxed max-w-3xl">
+          國際棋界名言：「棋弈有 99% 是戰術 (Chess is 99% tactics)」。只要掌握規律性題型、盲棋空間感與殘局原則，你的棋力便能在短時間內突飛猛進。
+        </p>
+      </div>
+
+      <!-- Grid of 4 Pillars -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="text-2xl mb-2">🎯</div>
+          <h3 class="font-bold text-amber-400 text-base mb-1">1. 戰術識型 (Tactics)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            雙重威脅 (Fork)、牽制 (Pin)、串擊 (Skewer)、閃將 (Discovered Check)、消除防守子 (Deflection)。透過大量題庫形成大腦的直覺反射。
+          </p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="text-2xl mb-2">👁️</div>
+          <h3 class="font-bold text-amber-400 text-base mb-1">2. 空間感 (Vision)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            座標極速點擊、斜線掌控 (Diagonals)、關鍵格 (Critical Squares)。盲棋能力並非天賦，而是熟悉 64 格相對座標後自然生出的空間投影。
+          </p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="text-2xl mb-2">👑</div>
+          <h3 class="font-bold text-amber-400 text-base mb-1">3. 殘局簡化 (Endgame)</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            單兵殘局與對王 (Opposition)、單車單王殘局、菲利多爾與盧塞納位置。殘局學得好，中局兌子簡化就永遠胸有成竹。
+          </p>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div class="text-2xl mb-2">🔄</div>
+          <h3 class="font-bold text-amber-400 text-base mb-1">4. 啄木鳥訓練法</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            (The Woodpecker Method) 挑選 200~300 題經典戰術，第一輪用 4 週做完；第二輪 2 週重做；第三輪 1 週重做，直至能在 1 秒內直覺看破佈局。
+          </p>
+        </div>
+      </div>
+
+      <!-- Recommended Mini-games to Play with Friends/Online -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-lg font-bold text-amber-400 mb-4">🎮 4 個能快速提升實力的「西洋棋迷你練習遊戲」</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60">
+            <h4 class="font-bold text-indigo-300 text-sm mb-1">① 兵的戰爭 (Pawn Wars / 8對8兵棋)</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>規則：</strong>棋盤上只放國王和雙方的 8 顆兵。誰先將兵升變成皇后，或誰先吃光對方的兵即獲勝。<br>
+              <strong>鍛鍊效益：</strong>極致訓練「通路兵 (Passed Pawn)」、「兵鏈結構 (Pawn Chain)」與「突破計算 (Pawn Breakthrough)」。
+            </p>
+          </div>
+          <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60">
+            <h4 class="font-bold text-indigo-300 text-sm mb-1">② 騎士漫遊圍城 (Knight & Pawns)</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>規則：</strong>一方拿國王 + 4 個兵，另一方拿一隻騎士 + 國王。防守方需用騎士阻擋對手衝兵。<br>
+              <strong>鍛鍊效益：</strong>徹底掌握騎士在閉合防禦局面下的關鍵封鎖格與防守走位。
+            </p>
+          </div>
+          <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60">
+            <h4 class="font-bold text-indigo-300 text-sm mb-1">③ 戰術狂潮 (Puzzle Rush / Streak)</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>規則：</strong>限時 3 分鐘或只要答錯 3 題就出局，連續解出由淺入深的戰術題目。<br>
+              <strong>鍛鍊效益：</strong>大幅壓縮「戰術直覺辨識」的反應時間，避免在實戰快棋或讀秒階段超時。
+            </p>
+          </div>
+          <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60">
+            <h4 class="font-bold text-indigo-300 text-sm mb-1">④ 盲棋座標報位對決 (Blindfold Coordinate Calling)</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>規則：</strong>兩人背對背，一人隨機報座標（如 d5），另一人必須立刻回答「白格或黑格」，並說出騎士從 b1 到達該格的最短步數。<br>
+              <strong>鍛鍊效益：</strong>建立不需眼睛看也能在大腦中投影 64 格空間的頂尖棋感。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Online Platforms Reference -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-lg font-bold text-amber-400 mb-3">🌐 全球主流免費題目練習平台</h3>
+        <div class="grid md:grid-cols-3 gap-4 text-xs">
+          <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+            <div class="font-bold text-sm text-slate-200 mb-1">Lichess.org (強烈推薦)</div>
+            <p class="text-slate-400 mb-2">完全免費、開源、無廣告。提供海量實戰題庫、Puzzle Streak (連續答題)、Puzzle Storm、棋盤座標訓練與殘局庫。</p>
+            <span class="text-amber-400 font-mono text-[11px]">功能：無限題目 / 戰術儀表板</span>
+          </div>
+          <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+            <div class="font-bold text-sm text-slate-200 mb-1">Chess.com</div>
+            <p class="text-slate-400 mb-2">全球最大棋友社區。擁有著名的 Puzzle Rush、Puzzle Battle (雙人題目競速對決) 及各式評分段機器人練習。</p>
+            <span class="text-amber-400 font-mono text-[11px]">功能：Puzzle Battle / 大師機器人</span>
+          </div>
+          <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+            <div class="font-bold text-sm text-slate-200 mb-1">Chessable</div>
+            <p class="text-slate-400 mb-2">結合間隔重複記憶 (Spaced Repetition) 演算法的專門開局定式與戰術記憶平台，適合深入精進體系。</p>
+            <span class="text-amber-400 font-mono text-[11px]">功能：開局庫記憶 / 啄木鳥法</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800/80 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
+    ChessMaster 訓練工坊 | 離線單檔應用，隨開即練
+  </footer>
+
+  <!-- App Logic Script -->
+  <script>
+    // --- Unicode Chess Symbols Mapping ---
+    const PIECES = {
+      'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
+      'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
+    };
+
+    // --- Tab Switcher ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-500', 'text-slate-900', 'shadow');
+        btn.classList.add('bg-slate-700', 'text-slate-300');
+      });
+      document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+
+      const activeBtn = document.getElementById('tab-' + tabId);
+      const activeSec = document.getElementById('section-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-700', 'text-slate-300');
+        activeBtn.classList.add('bg-amber-500', 'text-slate-900', 'shadow');
+      }
+      if (activeSec) activeSec.classList.remove('hidden');
+
+      if (tabId === 'tactics') renderTacticsBoard();
+      if (tabId === 'coordinates') renderCoordBoard();
+      if (tabId === 'knight') initKnightGame();
+    }
+
+    // ==========================================
+    // 1. TACTICS PUZZLE ENGINE
+    // ==========================================
+    const PUZZLES = [
+      {
+        id: 1,
+        title: "第 1 題：底線悶殺 (Back Rank Mate)",
+        category: "將死戰術 (Checkmate Pattern)",
+        rating: "850 - 初級",
+        turn: "w",
+        desc: "黑方國王躲在後面，前面有三個兵阻擋逃跑。白方車 (Rook) 找到絕殺機會！",
+        knowledge: "底線將死是西洋棋中最常見的戰術模式。當對手的國王被自己的兵封住逃生退路（無換氣格 Luft）時，沉底將軍即可直接終局。",
+        board: [
+          ['r', '', '', '', '', 'r', 'k', ''],
+          ['p', 'p', 'p', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['', '', '', 'R', '', '', 'K', '']
+        ],
+        solution: { from: [7, 3], to: [0, 3] }, // d1 to d8
+        hint: "注意黑方第 8 橫線（底線）是否有防禦？白車可以直衝到底線！"
+      },
+      {
+        id: 2,
+        title: "第 2 題：騎士捉雙 (Royal Knight Fork)",
+        category: "雙重攻擊 (Fork)",
+        rating: "1050 - 基礎",
+        turn: "w",
+        desc: "黑方的國王和皇后站位尷尬，白方騎士可以一躍而上，發動致命捉雙！",
+        knowledge: "騎士是發動「捉雙 (Fork)」最具威脅的棋子，因為它的走法特別，被攻擊的皇后無法反過來攻擊騎士。",
+        board: [
+          ['', '', '', 'q', '', 'r', 'k', ''],
+          ['p', 'p', '', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', 'N', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['', '', '', '', 'R', '', 'K', '']
+        ],
+        solution: { from: [3, 4], to: [1, 2] }, // e5 to c6
+        hint: "尋找一個同時能攻擊黑王 (g8) 和黑后 (d8) 的 L 型跳轉點！"
+      },
+      {
+        id: 3,
+        title: "第 3 題：絕對牽制 (Absolute Pin)",
+        category: "牽制 (Pin)",
+        rating: "1150 - 中級",
+        turn: "w",
+        desc: "黑方的大子站在同一斜線上，主教 (Bishop) 能利用牽制重創黑方！",
+        knowledge: "當被攻擊的棋子身後是國王時，該棋子受制於規則「絕對不能移動」（否則國王會被吃），這被稱為絕對牽制。",
+        board: [
+          ['r', '', '', '', 'k', '', '', 'r'],
+          ['p', 'p', '', '', 'q', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', 'B', '', '', '', '', ''],
+          ['P', 'P', 'P', 'P', '', 'P', 'P', 'P'],
+          ['R', 'N', '', 'Q', 'K', '', 'N', 'R']
+        ],
+        solution: { from: [5, 2], to: [1, 6] }, // c3 to g7 (pin queen to king)
+        hint: "黑王在 e8，黑后在 e7，如果主教沿著斜線卡在關鍵位置..."
+      },
+      {
+        id: 4,
+        title: "第 4 題：串擊掠奪 (The Skewer)",
+        category: "串擊 (Skewer)",
+        rating: "1200 - 中級",
+        turn: "w",
+        desc: "串擊又被稱為「反牽制」：較有價值的棋子在前面，被迫躲避後將後方棋子暴露在攻擊下！",
+        knowledge: "串擊中，價值更高的棋子（如國王或皇后）受到威脅必須走開，從而讓攻擊方吃掉其身後保護的次要棋子（如車）。",
+        board: [
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', 'k', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', 'r'],
+          ['R', '', '', '', 'K', '', '', '']
+        ],
+        solution: { from: [7, 0], to: [1, 0] }, // a1 to a7 check king, king moves, white eats rook on h7
+        hint: "白車橫向將軍，逼迫黑王閃避，隨後白車就能吞噬身後的黑車！"
+      },
+      {
+        id: 5,
+        title: "第 5 題：消除防守子 (Remove the Defender)",
+        category: "消除防禦 (Deflection)",
+        rating: "1350 - 進階",
+        turn: "w",
+        desc: "黑方騎士死守著底線關鍵格。白方必須先拔除這顆防禦釘子！",
+        knowledge: "許多看似被守住的關鍵格，只要先強行消滅或引開防守棋子，整道防線就會瞬間崩潰。",
+        board: [
+          ['', '', '', 'r', '', 'r', 'k', ''],
+          ['p', 'p', '', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', 'n', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', 'B', '', ''],
+          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['', '', '', 'R', '', '', 'K', '']
+        ],
+        solution: { from: [5, 5], to: [2, 5] }, // Bxf6
+        hint: "用主教吃掉 f6 的騎士，摧毀黑方防衛體系！"
+      },
+      {
+        id: 6,
+        title: "第 6 題：閃擊威脅 (Discovered Attack)",
+        category: "閃擊 (Discovered Attack)",
+        rating: "1300 - 進階",
+        turn: "w",
+        desc: "白方的主教擋住了白后的攻擊路線。只要白主教挪開，就能同時發動雙向打擊！",
+        knowledge: "挪動前方棋子（帶來第一重威脅），同時露出後方遠程重子的直線攻擊（第二重威脅），對手往往顧此失彼。",
+        board: [
+          ['r', '', '', 'q', '', 'r', 'k', ''],
+          ['p', 'p', '', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', 'B', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['R', '', '', 'Q', '', '', 'K', '']
+        ],
+        solution: { from: [3, 2], to: [1, 4] }, // Bishop to e7 attacking rook, Queen unleashes on d8
+        hint: "移開主教攻擊對手的車，同時讓後方的白皇后直撲對手！"
+      },
+      {
+        id: 7,
+        title: "第 7 題：棄后絕殺 (Queen Sacrifice Mate)",
+        category: "棄子絕殺 (Tactical Combination)",
+        rating: "1500 - 挑戰",
+        turn: "w",
+        desc: "西洋棋中最令人熱血沸騰的經典時刻——果斷棄后，換取無可阻擋的雙車絕殺！",
+        knowledge: "子力價值（皇后=9分，兵=1分）只是參考。當你能計算出絕對的將死路徑時，哪怕是皇后也可以慷慨奉獻。",
+        board: [
+          ['', '', '', '', '', 'r', 'k', ''],
+          ['p', 'p', 'p', '', '', 'p', 'p', 'p'],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['P', 'P', 'P', '', '', 'P', 'P', 'P'],
+          ['', '', 'R', 'Q', '', '', 'K', '']
+        ],
+        solution: { from: [7, 3], to: [0, 3] }, // Qd8 check!
+        hint: "勇敢地將皇后衝到底線 (d8) 給予黑方致命打擊！"
+      }
+    ];
+
+    let currentPuzzleIdx = 0;
+    let selectedSquare = null;
+    let puzzleSolved = false;
+
+    function renderTacticsBoard() {
+      const p = PUZZLES[currentPuzzleIdx];
+      const boardEl = document.getElementById('tactics-board');
+      boardEl.innerHTML = '';
+
+      document.getElementById('puzzle-index').innerText = currentPuzzleIdx + 1;
+      document.getElementById('puzzle-total').innerText = PUZZLES.length;
+      document.getElementById('puzzle-title').innerText = p.title;
+      document.getElementById('puzzle-desc').innerText = p.desc;
+      document.getElementById('puzzle-category').innerText = p.category;
+      document.getElementById('puzzle-rating').innerText = `難度評分: ${p.rating}`;
+      document.getElementById('puzzle-knowledge').innerText = p.knowledge;
+      document.getElementById('tactics-to-move').innerText = p.turn === 'w' ? '白先走 (White to Move)' : '黑先走 (Black to Move)';
+      
+      const badge = document.getElementById('puzzle-status-badge');
+      badge.innerText = puzzleSolved ? '已通過 🎉' : '思考中';
+      badge.className = puzzleSolved 
+        ? 'text-xs px-2.5 py-1 rounded font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+        : 'text-xs px-2.5 py-1 rounded font-medium bg-slate-700 text-slate-300';
+
+      const feedback = document.getElementById('puzzle-feedback');
+      if (!puzzleSolved) feedback.classList.add('hidden');
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement('div');
+          sq.className = `square ${(r + c) % 2 === 0 ? 'sq-light' : 'sq-dark'}`;
+          sq.dataset.row = r;
+          sq.dataset.col = c;
+
+          const pieceChar = p.board[r][c];
+          if (pieceChar) {
+            const isWhite = pieceChar === pieceChar.toUpperCase();
+            const span = document.createElement('span');
+            span.className = `piece ${isWhite ? 'piece-white' : 'piece-black'}`;
+            span.textContent = PIECES[pieceChar];
+            sq.appendChild(span);
+          }
+
+          if (selectedSquare && selectedSquare[0] === r && selectedSquare[1] === c) {
+            sq.classList.add('sq-selected');
+          }
+
+          sq.addEventListener('click', () => handleSquareClick(r, c));
+          boardEl.appendChild(sq);
+        }
+      }
+    }
+
+    function handleSquareClick(r, c) {
+      if (puzzleSolved) return;
+      const p = PUZZLES[currentPuzzleIdx];
+
+      if (!selectedSquare) {
+        const piece = p.board[r][c];
+        if (!piece) return;
+        const isWhite = piece === piece.toUpperCase();
+        if ((p.turn === 'w' && !isWhite) || (p.turn === 'b' && isWhite)) return;
+        selectedSquare = [r, c];
+        renderTacticsBoard();
+      } else {
+        const [fromR, fromC] = selectedSquare;
+        if (fromR === r && fromC === c) {
+          selectedSquare = null;
+          renderTacticsBoard();
+          return;
+        }
+
+        // Check if move matches solution
+        if (fromR === p.solution.from[0] && fromC === p.solution.from[1] &&
+            r === p.solution.to[0] && c === p.solution.to[1]) {
+          // Success!
+          puzzleSolved = true;
+          // Apply move to board
+          p.board[r][c] = p.board[fromR][fromC];
+          p.board[fromR][fromC] = '';
+          selectedSquare = null;
+          renderTacticsBoard();
+
+          const feedback = document.getElementById('puzzle-feedback');
+          feedback.classList.remove('hidden');
+          feedback.className = 'p-3.5 rounded-lg bg-emerald-900/40 border border-emerald-500/50 text-emerald-300 text-sm font-medium';
+          feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${p.knowledge}`;
+        } else {
+          // Wrong move
+          const feedback = document.getElementById('puzzle-feedback');
+          feedback.classList.remove('hidden');
+          feedback.className = 'p-3.5 rounded-lg bg-red-900/40 border border-red-500/50 text-red-300 text-sm font-medium';
+          feedback.innerHTML = `❌ <strong>這不是最佳解法。</strong> 再仔細觀察對方的破綻，或點擊「提示」！`;
+          selectedSquare = null;
+          renderTacticsBoard();
+        }
+      }
+    }
+
+    function hintTactic() {
+      const p = PUZZLES[currentPuzzleIdx];
+      const feedback = document.getElementById('puzzle-feedback');
+      feedback.classList.remove('hidden');
+      feedback.className = 'p-3.5 rounded-lg bg-amber-900/40 border border-amber-500/50 text-amber-300 text-sm';
+      feedback.innerHTML = `💡 <strong>戰術提示：</strong> ${p.hint}`;
+    }
+
+    function resetTactic() {
+      puzzleSolved = false;
+      selectedSquare = null;
+      // Deep clone initial puzzle state
+      PUZZLES[currentPuzzleIdx].board = JSON.parse(JSON.stringify(INITIAL_PUZZLE_BOARDS[currentPuzzleIdx]));
+      renderTacticsBoard();
+    }
+
+    function nextTactic() {
+      currentPuzzleIdx = (currentPuzzleIdx + 1) % PUZZLES.length;
+      puzzleSolved = false;
+      selectedSquare = null;
+      renderTacticsBoard();
+    }
+
+    // Save initial boards for reset
+    const INITIAL_PUZZLE_BOARDS = PUZZLES.map(p => JSON.parse(JSON.stringify(p.board)));
+
+
+    // ==========================================
+    // 2. COORDINATE VISION TRAINER
+    // ==========================================
+    let coordTimer = null;
+    let coordTimeLeft = 30;
+    let coordScore = 0;
+    let coordStreak = 0;
+    let currentTargetCoord = '';
+    let isCoordPlaying = false;
+    let coordIsWhiteBottom = true;
+
+    const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
+
+    function renderCoordBoard() {
+      const boardEl = document.getElementById('coord-board');
+      boardEl.innerHTML = '';
+      
+      const files = coordIsWhiteBottom ? FILES : [...FILES].reverse();
+      const ranks = coordIsWhiteBottom ? RANKS : [...RANKS].reverse();
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement('div');
+          const isLight = (r + c) % 2 === 0;
+          sq.className = `square ${isLight ? 'sq-light' : 'sq-dark'}`;
+          
+          const coordName = files[c] + ranks[r];
+          sq.dataset.coord = coordName;
+
+          // Corner coordinate indicator
+          if (c === 0) {
+            const rankLabel = document.createElement('span');
+            rankLabel.className = 'absolute top-0.5 left-1 text-[10px] font-bold text-slate-500 pointer-events-none';
+            rankLabel.innerText = ranks[r];
+            sq.appendChild(rankLabel);
+          }
+          if (r === 7) {
+            const fileLabel = document.createElement('span');
+            fileLabel.className = 'absolute bottom-0.5 right-1 text-[10px] font-bold text-slate-500 pointer-events-none';
+            fileLabel.innerText = files[c];
+            sq.appendChild(fileLabel);
+          }
+
+          sq.addEventListener('click', () => onCoordSquareClick(coordName, sq));
+          boardEl.appendChild(sq);
+        }
+      }
+    }
+
+    function generateRandomCoord() {
+      const randomFile = FILES[Math.floor(Math.random() * 8)];
+      const randomRank = RANKS[Math.floor(Math.random() * 8)];
+      return randomFile + randomRank;
+    }
+
+    function startCoordGame() {
+      if (coordTimer) clearInterval(coordTimer);
+      coordTimeLeft = 30;
+      coordScore = 0;
+      coordStreak = 0;
+      isCoordPlaying = true;
+
+      document.getElementById('coord-score').innerText = '0';
+      document.getElementById('coord-streak').innerText = '0';
+      document.getElementById('coord-timer').innerText = '30s';
+      document.getElementById('btn-start-coord').innerText = '🔄 重新開始';
+      document.getElementById('coord-feedback-msg').innerText = '請點擊上方顯示的格子！';
+
+      pickNextTargetCoord();
+
+      coordTimer = setInterval(() => {
+        coordTimeLeft--;
+        document.getElementById('coord-timer').innerText = coordTimeLeft + 's';
+        if (coordTimeLeft <= 0) {
+          clearInterval(coordTimer);
+          isCoordPlaying = false;
+          document.getElementById('target-coord').innerText = '時間到!';
+          document.getElementById('coord-feedback-msg').innerText = `挑戰結束！你的總得分是：${coordScore} 分！`;
+          document.getElementById('btn-start-coord').innerText = '▶️ 再次挑戰';
+        }
+      }, 1000);
+    }
+
+    function pickNextTargetCoord() {
+      let next;
+      do {
+        next = generateRandomCoord();
+      } while (next === currentTargetCoord);
+      currentTargetCoord = next;
+      document.getElementById('target-coord').innerText = currentTargetCoord;
+    }
+
+    function onCoordSquareClick(coord, sqEl) {
+      if (!isCoordPlaying) return;
+
+      if (coord === currentTargetCoord) {
+        coordScore++;
+        coordStreak++;
+        document.getElementById('coord-score').innerText = coordScore;
+        document.getElementById('coord-streak').innerText = coordStreak;
+        sqEl.classList.add('sq-correct');
+        setTimeout(() => sqEl.classList.remove('sq-correct'), 300);
+        pickNextTargetCoord();
+      } else {
+        coordStreak = 0;
+        document.getElementById('coord-streak').innerText = coordStreak;
+        sqEl.classList.add('sq-wrong');
+        setTimeout(() => sqEl.classList.remove('sq-wrong'), 300);
+      }
+    }
+
+    function toggleCoordOrientation() {
+      coordIsWhiteBottom = !coordIsWhiteBottom;
+      document.getElementById('coord-perspective').innerText = coordIsWhiteBottom ? '視角：白方' : '視角：黑方';
+      renderCoordBoard();
+    }
+
+
+    // ==========================================
+    // 3. KNIGHT JUMP GAME
+    // ==========================================
+    let knightPos = [7, 1]; // b1
+    let targetStars = [];
+    let knightSteps = 0;
+    let knightLevel = 1;
+
+    const KNIGHT_LEVELS = [
+      {
+        level: 1,
+        start: [7, 1], // b1
+        stars: [[5, 2], [3, 3], [1, 2]], // c3, d5, c7
+        name: "第 1 關：縱向推進"
+      },
+      {
+        level: 2,
+        start: [4, 4], // e4
+        stars: [[2, 5], [1, 3], [3, 1], [6, 2]], // f6, d7, b5, c2
+        name: "第 2 關：中心八方飛躍"
+      },
+      {
+        level: 3,
+        start: [7, 7], // h1
+        stars: [[5, 6], [4, 4], [2, 3], [0, 2]], // g3, e4, d6, c8
+        name: "第 3 關：從底角到彼岸"
+      }
+    ];
+
+    function initKnightGame() {
+      const cfg = KNIGHT_LEVELS[knightLevel - 1];
+      knightPos = [...cfg.start];
+      targetStars = cfg.stars.map(s => [...s]);
+      knightSteps = 0;
+      updateKnightUI();
+      renderKnightBoard();
+    }
+
+    function updateKnightUI() {
+      document.getElementById('knight-step-count').innerText = `步數: ${knightSteps}`;
+      document.getElementById('knight-stars-left').innerText = `${targetStars.length} ⭐`;
+      document.getElementById('knight-level').innerText = `第 ${knightLevel} 關 / 共 ${KNIGHT_LEVELS.length} 關`;
+    }
+
+    function getKnightMoves(r, c) {
+      const offsets = [
+        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+        [1, -2], [1, 2], [2, -1], [2, 1]
+      ];
+      return offsets
+        .map(([dr, dc]) => [r + dr, c + dc])
+        .filter(([nr, nc]) => nr >= 0 && nr < 8 && nc >= 0 && nc < 8);
+    }
+
+    function renderKnightBoard() {
+      const boardEl = document.getElementById('knight-board');
+      boardEl.innerHTML = '';
+      const validMoves = getKnightMoves(knightPos[0], knightPos[1]);
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const sq = document.createElement('div');
+          const isLight = (r + c) % 2 === 0;
+          sq.className = `square ${isLight ? 'sq-light' : 'sq-dark'}`;
+
+          const isKnightHere = knightPos[0] === r && knightPos[1] === c;
+          const starIdx = targetStars.findIndex(s => s[0] === r && s[1] === c);
+          const isValidTarget = validMoves.some(m => m[0] === r && m[1] === c);
+
+          if (isKnightHere) {
+            const piece = document.createElement('span');
+            piece.className = 'piece piece-white';
+            piece.textContent = '♘';
+            sq.appendChild(piece);
+            sq.classList.add('sq-selected');
+          } else if (starIdx !== -1) {
+            const star = document.createElement('span');
+            star.textContent = '⭐';
+            star.className = 'text-2xl filter drop-shadow';
+            sq.appendChild(star);
+          }
+
+          if (isValidTarget) {
+            sq.classList.add(starIdx !== -1 ? 'sq-capture' : 'sq-hint');
+            sq.addEventListener('click', () => moveKnight(r, c));
+          }
+
+          boardEl.appendChild(sq);
+        }
+      }
+    }
+
+    function moveKnight(r, c) {
+      knightPos = [r, c];
+      knightSteps++;
+
+      // Check star capture
+      const starIdx = targetStars.findIndex(s => s[0] === r && s[1] === c);
+      if (starIdx !== -1) {
+        targetStars.splice(starIdx, 1);
+      }
+
+      updateKnightUI();
+
+      if (targetStars.length === 0) {
+        document.getElementById('knight-msg').innerHTML = `🎉 <strong>太神了！</strong> 你用了 ${knightSteps} 步吃完了所有星星！`;
+      } else {
+        document.getElementById('knight-msg').innerText = `繼續前進！還剩 ${targetStars.length} 顆星！`;
+      }
+
+      renderKnightBoard();
+    }
+
+    function resetKnightGame() {
+      initKnightGame();
+      document.getElementById('knight-msg').innerText = '本關已重置，請重新出發！';
+    }
+
+    function nextKnightLevel() {
+      knightLevel = (knightLevel % KNIGHT_LEVELS.length) + 1;
+      initKnightGame();
+      document.getElementById('knight-msg').innerText = `已切換至 ${KNIGHT_LEVELS[knightLevel - 1].name}！`;
+    }
+
+
+    // --- On Initial Load ---
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTacticsBoard();
+      renderCoordBoard();
+    });
+  </script>
+</body>
+</html>
