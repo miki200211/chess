@@ -1210,7 +1210,14 @@
       const legals = getLegalMoves(board, fr, fc);
       if (!legals.some(([mr, mc]) => mr === tr && mc === tc)) return false;
       const after = makeMove(board, fr, fc, tr, tc);
-      if (isMateIn1 && !isCheckmate(after, enemy)) return false;
+      if (isMateIn1) {
+        if (!isCheckmate(after, enemy)) return false;
+      } else {
+        // Strict anti-blunder check: NO legal enemy move may capture our piece on [tr, tc]!
+        const enemyMoves = getAllLegalMoves(after, enemy);
+        const capturesOnTarget = enemyMoves.filter(m => m.to[0] === tr && m.to[1] === tc);
+        if (capturesOnTarget.length > 0) return false;
+      }
       return true;
     }
 
@@ -1319,7 +1326,7 @@
         turn: "w", isMateIn1: false,
         desc: "敵方國王與皇后同時暴露在騎士射程內。跳入中心格同時將軍並鎖定皇后！",
         knowledge: "皇家捉雙（Royal Fork）：騎士同時攻擊國王與皇后，敵王被迫應將，皇后必失！",
-        fen: "r3k2r/pppq1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
+        fen: "r3k2r/pppq1p1p/8/3N4/8/8/PPP2PPP/R1B1K2R",
         from: [3, 3], to: [2, 5]
       },
       {
@@ -1328,16 +1335,16 @@
         turn: "w", isMateIn1: false,
         desc: "跳動騎士切入敵方防線弱點，一舉同時威脅國王、皇后與重車！",
         knowledge: "家族捉雙（Family Fork）：騎士一跳同時攻擊王、后、車三大主力，瞬間瓦解敵軍！",
-        fen: "r3k3/pp1q1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
+        fen: "r3k2r/pp3ppp/4q3/3N4/4P3/8/PPP2PPP/R1B1K2R",
         from: [3, 3], to: [1, 2]
       },
       {
         title: "中路小兵挺身捉雙 (Central Pawn Fork)",
         category: "基礎捉雙", themeKey: "fork", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵方兩顆輕子並列在前。推進小兵以小博大，同時捉雙兩顆敵方大子！",
-        knowledge: "小兵捉雙（Pawn Fork）：價值僅 1 分的小兵同時威脅兩顆 3 分以上的子力，穩賺子力優勢！",
-        fen: "r1bqk2r/pppp1ppp/2n1bn2/8/3P4/2N2N2/PPP2PPP/R1BQKB1R",
+        desc: "敵方兩顆大子並列在前且無退路。推進小兵以小博大，同時捉雙敵方兩顆大子！",
+        knowledge: "小兵捉雙（Pawn Fork）：價值僅 1 分的小兵同時威脅兩顆敵方大子，且敵子無法反吃小兵，穩賺子力優勢！",
+        fen: "r2qk2r/pp1p1ppp/2n1r3/8/3P4/2N1PN2/PPP2PPP/R1BQKB1R",
         from: [4, 3], to: [3, 3]
       },
       {
@@ -1377,32 +1384,32 @@
         from: [3, 4], to: [2, 6]
       },
       {
-        title: "重車沉底將軍捉雙贏后 (Rook Fork on King & Queen)",
+        title: "重車沉底將軍捉雙 (Rook 7th-Rank Fork)",
         category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵王與敵后同時位於第 7 排！將重車推進第 7 排，將軍敵王並同時攻擊敵后！",
-        knowledge: "車之橫排雙擊：當敵王與大子處於同一橫排時，重車切入即可製造將軍捉雙！",
-        fen: "8/1q2k1pp/8/8/4N3/8/5PPP/2R3K1",
+        desc: "敵王與邊翼主教同時位於第 7 排！將重車推進第 7 排，將軍敵王並同時鎖定無根主教！",
+        knowledge: "車之橫排雙擊：當敵王與無根大子處於同一橫排時，重車切入即可製造將軍捉雙！",
+        fen: "8/b3k1pp/8/8/8/8/5PPP/2R3K1",
         from: [7, 2], to: [1, 2]
       },
 
       // === PIN & SKEWER (8) ===
       {
-        title: "主教大斜線絕對牽制死后 (Absolute Bishop Pin)",
+        title: "主教大斜線絕對牽制重車 (Absolute Bishop Pin)",
         category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵方皇后與國王處於同一條大斜線上。調動主教釘死敵后，使其動彈不得！",
-        knowledge: "絕對牽制（Absolute Pin）：因身後是國王，被牽制的皇后受規則限制無法移開，只能任人宰割！",
-        fen: "4k3/3q4/8/8/8/3B4/PPP2PPP/4K2R",
+        desc: "敵方重車與國王處於同一條大斜線上。調動主教釘死敵車，使其完全無法移動或反擊！",
+        knowledge: "絕對牽制（Absolute Pin）：因身後是國王，且車無法斜走反吃主教，被牽制的重車動彈不得必死無疑！",
+        fen: "4k3/3r4/8/8/8/3B4/PPP2PPP/4K2R",
         from: [5, 3], to: [3, 1]
       },
       {
-        title: "重車開放線絕對牽制死后 (Absolute Rook Pin)",
+        title: "重車開放線絕對牽制輕子 (Absolute Rook Pin)",
         category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵方皇后擋在敵王正前方。橫移重車佔領開放直線，將敵后死死釘在原地！",
-        knowledge: "直線絕對牽制：皇后雖強，一旦與國王排在同一條直線被敵車鎖定，也無法逃脫！",
-        fen: "4k3/4q3/8/8/8/8/PPP2PPP/2R3K1",
+        desc: "敵方主教擋在敵王正前方。橫移重車佔領開放直線，將敵方主教死死釘在原地！",
+        knowledge: "直線絕對牽制：主教無法直走反擊重車，一旦與國王排在同一條直線被敵車鎖定，即插翅難飛！",
+        fen: "4k3/4b3/8/8/8/8/PPP2PPP/2R3K1",
         from: [7, 2], to: [7, 4]
       },
       {
@@ -1438,7 +1445,7 @@
         turn: "w", isMateIn1: false,
         desc: "敵方 f7 小兵被白主教死死牽制在國王身前，完全沒有保護 g6 皇后的能力！直接出后吃掉敵后！",
         knowledge: "虛假保護（Pinned Defender）：被絕對牽制的棋子無法移動吃子，它所防守的大子實質上是無根懸空子！",
-        fen: "5rk1/5ppp/6q1/8/2B5/3Q4/5PPP/6K1",
+        fen: "5rk1/5pp1/6q1/8/2B5/3Q4/5PPP/6K1",
         from: [5, 3], to: [2, 6]
       },
       {
@@ -1559,7 +1566,7 @@
         turn: "w", isMateIn1: false,
         desc: "敵方皇后大意停留在沒有任何保護的中心格！立即出動騎士將其免費吃掉！",
         knowledge: "吃懸空子（Hanging Piece）：時刻掃描棋盤上沒有保護（無根）的敵方大子，這是實戰最常見的致勝來源！",
-        fen: "r1b1kbnr/pppp1ppp/2n5/4q3/8/5N2/PPPPPPPP/RNBQKB1R",
+        fen: "r1b1kbnr/pppp1ppp/n7/4q3/8/5N2/PPPPPPPP/RNBQKB1R",
         from: [5, 5], to: [3, 4]
       },
       {
@@ -1882,10 +1889,10 @@
         }
       }
 
-      // 4. Safe Dynamic Background Pawns (verified via verifyTacticalBoard so they never break solution!)
+      // 4. Safe Dynamic Background Pawns (verified via verifyTacticalBoard so they never attack [tr, tc] or break solution!)
       const candidateCols = [0, 1, 2, 5, 6, 7];
       for (const c of candidateCols) {
-        if (c === fc || c === tc) continue;
+        if (Math.abs(c - fc) <= 1 || Math.abs(c - tc) <= 1) continue;
         const wRow = rng() > 0.5 ? 6 : 5;
         if (rng() > 0.55 && !board[wRow][c] && !board[wRow - 1][c]) {
           board[wRow][c] = 'P';
