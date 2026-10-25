@@ -1943,8 +1943,15 @@
           }
         }
 
+        // Record all enemy pieces attacked by [tr, tc] before adding background pawns
+        const afterBeforePawns = makeMove(board, fr, fc, tr, tc);
+        const enemyColor = turn === 'w' ? 'b' : 'w';
+        const originalAttacks = getPseudoMoves(afterBeforePawns, tr, tc).filter(([r,c]) => {
+          return afterBeforePawns[r][c] && getColor(afterBeforePawns[r][c]) === enemyColor;
+        });
+
         // 4. Guaranteed Signature Pawn Structure:
-        // Every ID > 40 receives safe peripheral pawns.
+        // Every ID > 40 receives safe peripheral pawns, strictly preserving all tactical attack lines!
         const hash = (id * 2654435761 + (id % 137) * 7919 + (id % 31) * 997 + (id % 17) * 101) >>> 0;
         const colOrder = [0, 7, 1, 6, 2, 5, 3, 4];
         
@@ -1957,9 +1964,18 @@
             const wRow = wBit === 1 ? 6 : (wBit === 2 ? 5 : 4);
             if (!board[wRow][c] && !board[wRow - 1]?.[c] && !board[wRow + 1]?.[c]) {
               board[wRow][c] = 'P';
-              if (!verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1)) {
-                board[wRow][c] = '';
+              let ok = verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1);
+              if (ok && originalAttacks.length > 0) {
+                const testAfter = makeMove(board, fr, fc, tr, tc);
+                const newAttacks = getPseudoMoves(testAfter, tr, tc);
+                for (const [ar, ac] of originalAttacks) {
+                  if (!newAttacks.some(([nr, nc]) => nr === ar && nc === ac)) {
+                    ok = false;
+                    break;
+                  }
+                }
               }
+              if (!ok) board[wRow][c] = '';
             }
           }
 
@@ -1968,9 +1984,18 @@
             const bRow = bBit === 1 ? 1 : (bBit === 2 ? 2 : 3);
             if (!board[bRow][c] && !board[bRow - 1]?.[c] && !board[bRow + 1]?.[c]) {
               board[bRow][c] = 'p';
-              if (!verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1)) {
-                board[bRow][c] = '';
+              let ok = verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1);
+              if (ok && originalAttacks.length > 0) {
+                const testAfter = makeMove(board, fr, fc, tr, tc);
+                const newAttacks = getPseudoMoves(testAfter, tr, tc);
+                for (const [ar, ac] of originalAttacks) {
+                  if (!newAttacks.some(([nr, nc]) => nr === ar && nc === ac)) {
+                    ok = false;
+                    break;
+                  }
+                }
               }
+              if (!ok) board[bRow][c] = '';
             }
           }
         }
