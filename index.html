@@ -153,6 +153,174 @@
       color: #fbbf24;
       border-color: #f59e0b;
     }
+    .filter-bar-sub {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
+      align-items: center;
+    }
+    .filter-bar-sub::-webkit-scrollbar { display: none; }
+    .filter-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-right: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pill-elo {
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+    .pill-elo.active {
+      background: rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      border-color: #3b82f6;
+    }
+    .pill-woodpecker {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.18), rgba(168, 85, 247, 0.18));
+      border: 1px solid rgba(236, 72, 153, 0.5);
+      color: #f472b6;
+      font-weight: 700;
+    }
+    .pill-woodpecker.active {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      color: #ffffff;
+      border-color: #ec4899;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.5);
+    }
+
+    /* Woodpecker Training HUD */
+    .woodpecker-panel {
+      display: none;
+      background: linear-gradient(135deg, #1e1b4b, #1e293b);
+      border: 1px solid #6366f1;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    }
+    .woodpecker-panel.active {
+      display: block;
+    }
+    .wp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .wp-title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #a5b4fc;
+    }
+    .wp-cycle-badge {
+      background: rgba(99, 102, 241, 0.3);
+      border: 1px solid #818cf8;
+      color: #c7d2fe;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .wp-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .wp-metric-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+    .wp-metric-label {
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+    .wp-metric-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-top: 2px;
+    }
+    .wp-progress-bar-bg {
+      width: 100%;
+      height: 7px;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .wp-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ec4899, #6366f1, #38bdf8);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .wp-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Strategic 4 Elements Badge */
+    .strategic-tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    .strategic-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .strat-force {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .strat-tempo {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .strat-space {
+      background: rgba(59, 130, 246, 0.18);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+    .strat-pawn {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .strategic-detail-box {
+      font-size: 0.76rem;
+      color: #94a3b8;
+      border-left: 2px solid var(--primary);
+      padding-left: 8px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
 
     .game-layout {
       display: grid;
@@ -657,15 +825,78 @@
     <!-- 1. TACTICS TAB -->
     <div id="tab-tactics" class="tab-panel active">
 
-      <!-- Theme Filter Pills -->
+      <!-- 1. Tactical Themes Filter Bar (Geometric Motifs based on Study Report) -->
       <div class="filter-bar">
-        <button class="filter-pill active" onclick="setThemeFilter('all')" id="filter-all">🌟 全部綜合花樣 (10,000+題)</button>
-        <button class="filter-pill" onclick="setThemeFilter('classic')" id="filter-classic">👑 傳奇名局絕殺 (Classics)</button>
-        <button class="filter-pill" onclick="setThemeFilter('fork')" id="filter-fork">⚔️ 捉雙與雙擊 (Fork)</button>
-        <button class="filter-pill" onclick="setThemeFilter('skewer')" id="filter-skewer">🧲 牽制與串擊 (Pin/Skewer)</button>
+        <button class="filter-pill active" onclick="setThemeFilter('all')" id="filter-all">🌟 全部綜合題庫 (10,000+)</button>
+        <button class="filter-pill" onclick="setThemeFilter('fork')" id="filter-fork">⚔️ 雙重攻擊 (Fork)</button>
+        <button class="filter-pill" onclick="setThemeFilter('pin')" id="filter-pin">🧲 牽制與凍結 (Pin)</button>
+        <button class="filter-pill" onclick="setThemeFilter('skewer')" id="filter-skewer">🏹 凌厲串擊 (Skewer)</button>
+        <button class="filter-pill" onclick="setThemeFilter('discovered')" id="filter-discovered">⚡ 抽將與閃擊 (Discovered)</button>
+        <button class="filter-pill" onclick="setThemeFilter('deflection')" id="filter-deflection">🎯 引離與消除防衛 (Deflection)</button>
+        <button class="filter-pill" onclick="setThemeFilter('classic')" id="filter-classic">👑 經典名局絕殺 (50 Mates)</button>
+        <button class="filter-pill" onclick="setThemeFilter('hanging')" id="filter-hanging">🎁 掃除懸空子 (Hanging 0-1000)</button>
         <button class="filter-pill" onclick="setThemeFilter('mate1')" id="filter-mate1">🟢 一步將死 (Mate in 1)</button>
-        <button class="filter-pill" onclick="setThemeFilter('blackMove')" id="filter-blackMove">🔄 黑方精彩反擊 (Black to Move)</button>
-        <button class="filter-pill" onclick="setThemeFilter('hanging')" id="filter-hanging">🎁 困子與消除 (Traps & Hanging)</button>
+        <button class="filter-pill" onclick="setThemeFilter('blackMove')" id="filter-blackMove">🔄 黑方反擊 (Black)</button>
+      </div>
+
+      <!-- 2. Rating Bands (Elo Tiers) & Woodpecker Method Mode -->
+      <div class="filter-bar-sub">
+        <span class="filter-label">評分階梯:</span>
+        <button class="filter-pill pill-elo active" onclick="setEloFilter('all')" id="filter-elo-all">全部等級</button>
+        <button class="filter-pill pill-elo" onclick="setEloFilter('0-1000')" id="filter-elo-0-1000">🟢 入門基礎 (Elo 0–1000)</button>
+        <button class="filter-pill pill-elo" onclick="setEloFilter('1000-1600')" id="filter-elo-1000-1600">🟡 俱樂部 (Elo 1000–1600)</button>
+        <button class="filter-pill pill-elo" onclick="setEloFilter('1600+')" id="filter-elo-1600">🔴 高階大師 (Elo 1600+)</button>
+
+        <button class="filter-pill pill-woodpecker" onclick="toggleWoodpeckerMode()" id="btn-toggle-woodpecker" style="margin-left: auto;">
+          🐦 開啟啄木鳥循環訓練 (The Woodpecker Method)
+        </button>
+      </div>
+
+      <!-- 3. Woodpecker Method Training HUD -->
+      <div id="woodpecker-panel" class="woodpecker-panel">
+        <div class="wp-header">
+          <div class="wp-title-badge">
+            <span>🐦 啄木鳥循環衝刺模式</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">— 激活主動回想與直覺圖式自動化 (Axel Smith & Hans Tikkanen)</span>
+          </div>
+          <div id="wp-cycle-badge" class="wp-cycle-badge">週期 1 / 4：建立初始印象</div>
+        </div>
+
+        <div class="wp-metrics">
+          <div class="wp-metric-card">
+            <div class="wp-metric-label">週期題組進度</div>
+            <div id="wp-metric-progress" class="wp-metric-val">1 / 10</div>
+          </div>
+          <div class="wp-metric-card">
+            <div class="wp-metric-label">當前週期總耗時</div>
+            <div id="wp-metric-timer" class="wp-metric-val" style="color: #60a5fa;">00:00</div>
+          </div>
+          <div class="wp-metric-card">
+            <div class="wp-metric-label">目標時間 (減半)</div>
+            <div id="wp-metric-target" class="wp-metric-val" style="color: #f59e0b;">基準建立中</div>
+          </div>
+          <div class="wp-metric-card">
+            <div class="wp-metric-label">當前週期正確率</div>
+            <div id="wp-metric-accuracy" class="wp-metric-val" style="color: #4ade80;">100%</div>
+          </div>
+          <div class="wp-metric-card">
+            <div class="wp-metric-label">單題平均思考</div>
+            <div id="wp-metric-avg" class="wp-metric-val">--s</div>
+          </div>
+        </div>
+
+        <div class="wp-progress-bar-bg">
+          <div id="wp-progress-fill" class="wp-progress-fill" style="width: 10%;"></div>
+        </div>
+
+        <div class="wp-actions">
+          <button onclick="setWoodpeckerSetSize(10)" id="wp-btn-set-10" class="filter-pill active" style="padding: 3px 9px;">10 題精粹組</button>
+          <button onclick="setWoodpeckerSetSize(25)" id="wp-btn-set-25" class="filter-pill" style="padding: 3px 9px;">25 題進階組</button>
+          <button onclick="restartWoodpeckerCycle()" class="jump-btn" style="padding: 3px 10px; font-size: 0.75rem;">🔄 重啟本週期</button>
+          <button onclick="toggleWoodpeckerMode()" class="jump-btn" style="margin-left: auto; background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4); padding: 3px 10px; font-size: 0.75rem;">
+            ✕ 退出啄木鳥模式
+          </button>
+        </div>
       </div>
 
       <div class="game-layout">
@@ -746,9 +977,19 @@
           </div>
 
           <div class="knowledge-box">
-            <div class="knowledge-title">戰術要點解析</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <div class="knowledge-title" style="margin-bottom: 0;">戰術幾何與四大戰略解析</div>
+              <span id="puzzle-motif-badge" class="category-badge cat-med" style="font-size: 0.68rem;">幾何動機</span>
+            </div>
+            
+            <!-- Strategic 4-Elements Badges (Force, Time/Tempo, Space, Pawn Structure) -->
+            <div id="puzzle-strategic-tags" class="strategic-tag-container"></div>
+
             <div id="puzzle-knowledge" class="knowledge-content">
               底線將死是最基礎的殺局。黑國王逃不出第 8 排，重子沉底一擊必殺！
+            </div>
+            <div id="puzzle-strategic-detail" class="strategic-detail-box">
+              戰略思考：利用時間與節奏 (Tempo) 壓迫對手，建立無可逆轉之子力優勢。
             </div>
           </div>
 
@@ -940,46 +1181,199 @@
     </div>
 
 
-    <!-- 5. GUIDE TAB -->
+    <!-- 5. GUIDE TAB: COMPREHENSIVE STUDY REPORT & TRAINING SYSTEM -->
     <div id="tab-guide" class="tab-panel">
-      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(99, 102, 241, 0.2)); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 18px; margin-bottom: 14px;">
-        <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 6px;">🏆 適合新手的進階練棋法則</h2>
-        <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
-          新手學西洋棋最忌諱一開始背開局定式。只要掌握「一步將死」、「吃懸空子」與「捉雙 (Fork)」，勝率就能直接大幅躍升！
+      <!-- Hero Banner -->
+      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(99, 102, 241, 0.25)); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="font-size: 1.4rem;">📖</span>
+          <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">西洋棋戰術體系、階段性訓練步驟與經典教材研析指南</h2>
+        </div>
+        <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.6;">
+          本訓練平台核心邏輯依據<strong>系統化戰術模式識別 · 認知進化模型 · 啄木鳥循環訓練法 · 經典教材體系</strong>全方位構建。從「主動計算 (系統二)」逐步淬鍊為「秒級直覺模式識別 (系統一)」，跨越瓶頸邁向大師級水準！
         </p>
       </div>
 
-      <div class="guide-grid">
-        <div class="guide-card">
-          <h3>🎯 啄木鳥訓練法</h3>
-          <p>
-            利用本平台的「題號分類篩選」，先專門刷 30 題「🟢 入門：一步將死」，再刷 30 題「🟡 基礎：捉雙攻擊」，建立大腦瞬間識破戰術的直覺反射！
-          </p>
-        </div>
-
-        <div class="guide-card">
-          <h3>⚔️ 兵的戰爭 (Pawn Wars)</h3>
-          <p>
-            拿掉后、車、象、馬，只用 8 隻兵和國王對決。誰先升變誰勝。這是學懂通行兵與殘局最有趣的方法！
-          </p>
-        </div>
-
-        <div class="guide-card">
-          <h3>🌐 免費線上題庫推薦</h3>
-          <p>
-            <strong>Lichess.org：</strong>全球最良心開源平台，提供無廣告無限題目與 Puzzle Streak。<br>
-            <strong>Chess.com：</strong>適合找朋友下快棋與玩 Puzzle Rush。
-          </p>
-        </div>
-
-        <div class="guide-card">
-          <h3>📱 加入手機主畫面</h3>
-          <p>
-            <strong>iPhone (Safari)：</strong>底部分享 ➔「加入主畫面」。<br>
-            <strong>Android (Chrome)：</strong>右上角選單 ➔「加到主螢幕」。
-          </p>
+      <!-- Section 1: The 4 Strategic Elements -->
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>⚖️</span> 戰略控制的四大基本要素（亞瑟·塞拉萬 Yasser Seirawan 思考框架）
+        </h3>
+        <div class="guide-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+          <div class="guide-card" style="border-left: 4px solid #ef4444;">
+            <h3 style="color: #fca5a5;">🔴 1. 子力 (Force)</h3>
+            <p>
+              棋盤上雙方兵種數量的絕對平衡或相對優勢。子力領先往往是轉化為勝局最直接的物理基礎。在基礎階段首要任務為<strong>掃除無根懸空子 (Hanging Pieces)</strong> 與避免無謂送子。
+            </p>
+          </div>
+          <div class="guide-card" style="border-left: 4px solid #f59e0b;">
+            <h3 style="color: #fde68a;">🟡 2. 時間與節奏 (Tempo)</h3>
+            <p>
+              代表出子速度與對局主導權。每一步將軍、抽將或威脅都在剝奪對手的選擇權。獲取節奏意味著迫使對手進行被動防守，是所有戰術幾何打擊的先決動力！
+            </p>
+          </div>
+          <div class="guide-card" style="border-left: 4px solid #3b82f6;">
+            <h3 style="color: #93c5fd;">🔵 3. 空間 (Space)</h3>
+            <p>
+              棋子活動的自由度與所控制的格子數量。控制中樞與大斜線能大幅提升己方子力協調性，同時壓縮對手陣型，使其棋子互相阻擋並製造致命將死弱點。
+            </p>
+          </div>
+          <div class="guide-card" style="border-left: 4px solid #10b981;">
+            <h3 style="color: #6ee7b7;">🟢 4. 兵形結構 (Pawn Structure)</h3>
+            <p>
+              兵陣排列決定棋盤開放或封閉狀態，塑造長期戰略弱點（孤兵、疊兵、後退兵），並決定<strong>通路兵 (Passed Pawn)</strong> 的創造與升變路徑。
+            </p>
+          </div>
         </div>
       </div>
+
+      <!-- Section 2: Cognitive Evolution Model & The Woodpecker Method -->
+      <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+        <h3 style="font-size: 1.05rem; color: #a5b4fc; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>🧠</span> 認知進化模型：主動計算 vs 直覺模式識別
+        </h3>
+        <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px;">
+          大腦處理棋局存在兩種機制：<strong style="color: #f59e0b;">主動計算 (系統二)</strong> 需消耗大量認知資源進行深度搜尋，易疲勞且遲滯；<strong style="color: #4ade80;">模式識別 (系統一)</strong> 基於長期記憶庫中的圖式塊規，能進行秒級直覺感知。頂尖棋手能神速解題，核心在於長期累積龐大的模式識別庫！
+        </p>
+
+        <h4 style="font-size: 0.95rem; color: #f472b6; margin-bottom: 8px;">
+          🐦 特級大師「啄木鳥訓練法 (The Woodpecker Method)」官方 5 大週期表
+        </h4>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem; color: #cbd5e1; text-align: left;">
+            <thead>
+              <tr style="background: #0f172a; border-bottom: 1px solid var(--card-border); color: #f8fafc;">
+                <th style="padding: 8px 10px;">訓練週期 (Cycle)</th>
+                <th style="padding: 8px 10px;">目標完成時間</th>
+                <th style="padding: 8px 10px;">核心練習機制</th>
+                <th style="padding: 8px 10px;">認知轉化目標</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid rgba(51, 65, 85, 0.5);">
+                <td style="padding: 8px 10px; font-weight: 700; color: #60a5fa;">週期 1 (Cycle 1)</td>
+                <td style="padding: 8px 10px;">4 週 (4 Weeks)</td>
+                <td style="padding: 8px 10px;">完成整套固定題庫，記錄耗時與正確率</td>
+                <td style="padding: 8px 10px;">建立基礎計算鏈與初始題目印象</td>
+              </tr>
+              <tr style="background: rgba(15, 23, 42, 0.4); border-bottom: 1px solid rgba(51, 65, 85, 0.5);">
+                <td style="padding: 8px 10px; font-weight: 700; color: #94a3b8;">休息期 (Break)</td>
+                <td style="padding: 8px 10px;">2–3 天</td>
+                <td style="padding: 8px 10px;">完全停止該題庫練習</td>
+                <td style="padding: 8px 10px;">讓大腦神經網絡進行記憶鞏固</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(51, 65, 85, 0.5);">
+                <td style="padding: 8px 10px; font-weight: 700; color: #fbbf24;">週期 2 (Cycle 2)</td>
+                <td style="padding: 8px 10px;">2 週 (時間減半 50%)</td>
+                <td style="padding: 8px 10px;">解答完全相同題庫，目標總耗時減半</td>
+                <td style="padding: 8px 10px;">激活主動回想，提升留存率</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(51, 65, 85, 0.5);">
+                <td style="padding: 8px 10px; font-weight: 700; color: #f59e0b;">週期 3 (Cycle 3)</td>
+                <td style="padding: 8px 10px;">1 週 (再次減半 25%)</td>
+                <td style="padding: 8px 10px;">再次將解答總耗時減半</td>
+                <td style="padding: 8px 10px;">減少分支搜尋，強化圖式識別</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(51, 65, 85, 0.5);">
+                <td style="padding: 8px 10px; font-weight: 700; color: #ec4899;">週期 4 (Cycle 4)</td>
+                <td style="padding: 8px 10px;">數天 (A Few Days)</td>
+                <td style="padding: 8px 10px;">持續極速壓縮解題時間</td>
+                <td style="padding: 8px 10px;">消除計算遲滯，轉化為直覺感知</td>
+              </tr>
+              <tr style="background: rgba(236, 72, 153, 0.15);">
+                <td style="padding: 8px 10px; font-weight: 800; color: #f472b6;">最終週期 (Final)</td>
+                <td style="padding: 8px 10px; font-weight: 700;">1 天 (1 Day)</td>
+                <td style="padding: 8px 10px;">單日秒級極速完成整套題庫解答</td>
+                <td style="padding: 8px 10px; font-weight: 700; color: #4ade80;">實現戰術圖式的全自動化直覺反應！</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top: 10px; font-size: 0.74rem; color: #94a3b8;">
+          💡 <strong>現已內建本平台：</strong>請點擊上方戰術分頁中的「🐦 開啟啄木鳥循環訓練」按鈕，立即展開 10 題或 25 題週期衝刺！
+        </div>
+      </div>
+
+      <!-- Section 3: ChessDojo Rating Bands & Daily Training Allocation -->
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>⏱️</span> 各等級每日訓練時間與內容分配（ChessDojo 科學課表）
+        </h3>
+        <div class="guide-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="guide-card">
+            <h3 style="color: #4ade80;">🟢 0 – 1000 Elo（入門基礎期）</h3>
+            <p style="margin-bottom: 8px; font-weight: 600; color: #f8fafc;">每日 45–60 分鐘：</p>
+            <ul style="padding-left: 18px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.6;">
+              <li><strong>50% 基礎戰術與殺局：</strong>消除送子、抓無根懸空子、單步/兩步經典定式殺局。</li>
+              <li><strong>20% 開局原則與出子：</strong>爭奪中心、輕子先行、儘早王車易位。</li>
+              <li><strong>10% 基本定式殘局：</strong>單車階梯殺、單后將死、王兵基本推進。</li>
+              <li><strong>20% 慢棋實戰：</strong>著重防守意識，走每步棋前確認棋子未送給對手。</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h3 style="color: #fbbf24;">🟡 1000 – 1600 Elo（中階俱樂部棋手）</h3>
+            <p style="margin-bottom: 8px; font-weight: 600; color: #f8fafc;">每日 60–90 分鐘：</p>
+            <ul style="padding-left: 18px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.6;">
+              <li><strong>40% 啄木鳥循環訓練：</strong>重複循環精選題庫，建立秒級戰術圖式反應。</li>
+              <li><strong>30% 完整對局解析：</strong>賞析大師攻防邏輯與中盤戰略轉換。</li>
+              <li><strong>15% 分級殘局課程：</strong>王兵殘局對峙 (Opposition)、通路兵與兵之戰爭。</li>
+              <li><strong>15% 慢棋與自我復盤：</strong>精準標記戰術盲點與計算失誤。</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h3 style="color: #f87171;">🔴 1600 – 2000+ Elo（高階俱樂部至大師級）</h3>
+            <p style="margin-bottom: 8px; font-weight: 600; color: #f8fafc;">每日 90–120+ 分鐘：</p>
+            <ul style="padding-left: 18px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.6;">
+              <li><strong>25% 高階計算與防守：</strong>深度候選步推演、預防性思維 (Prophylaxis)。</li>
+              <li><strong>35% 兵形結構與名局：</strong>卡爾斯巴德兵形、孤兵與弱格長遠經營。</li>
+              <li><strong>20% 戰略性殘局原則：</strong>雪雪夫斯基「王中心化」與「兩處弱點原則」。</li>
+              <li><strong>20% 針對性復盤審查：</strong>利用引擎深度評估不對稱局面與微小優勢轉化。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Recommended Classics Roadmap -->
+      <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+        <h3 style="font-size: 1.05rem; color: #f59e0b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <span>📚</span> 分級晉升推薦經典教材地圖（研析精選）
+        </h3>
+        <div class="guide-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+          <div class="guide-card">
+            <h3 style="color: #60a5fa;">《Bobby Fischer Teaches Chess》</h3>
+            <p><strong>博比·菲舍爾 著</strong>（適合 Elo 0–1000）<br>
+            採用獨創的程式化學習模式，透過數百個連續圖解問答引導讀者推導雙重攻擊與底線殺局動機，能極速建立對棋盤威脅的直覺反射！</p>
+          </div>
+          <div class="guide-card">
+            <h3 style="color: #fde68a;">《Play Winning Chess》</h3>
+            <p><strong>亞瑟·塞拉萬 (Yasser Seirawan) 著</strong>（適合 Elo 0–1200）<br>
+            將複雜棋局歸納為子力、時間、空間與兵形四大戰略維度，是建立正確大局思考架構的不二法門。</p>
+          </div>
+          <div class="guide-card">
+            <h3 style="color: #f472b6;">《How to Beat Your Dad at Chess》</h3>
+            <p><strong>默里·錢德勒 (Murray Chandler) 著</strong>（適合 Elo 800–1400）<br>
+            歸納實戰中最常出現的 50 種經典殺局幾何圖形（歌劇院殺、博登雙象殺、阿拉伯殺等），建立一擊斃命的終結能力。</p>
+          </div>
+          <div class="guide-card">
+            <h3 style="color: #a78bfa;">《The Woodpecker Method》</h3>
+            <p><strong>阿克塞爾·史密斯 & 漢斯·蒂卡寧 著</strong>（適合 Elo 1000–1800+）<br>
+            特級大師親身驗證的循環衝刺記憶法，以間隔重複與主動回想鍛造秒級反應速度。</p>
+          </div>
+          <div class="guide-card">
+            <h3 style="color: #34d399;">《Endgame Strategy》</h3>
+            <p><strong>米哈伊爾·雪雪夫斯基 著</strong>（適合 Elo 1600+）<br>
+            殘局大師聖經：王中心化、不要急於求成、兩處弱點原則，將戰術優勢化為勝利的終局藝術。</p>
+          </div>
+          <div class="guide-card">
+            <h3 style="color: #38bdf8;">《My System》</h3>
+            <p><strong>阿隆·寧姆佐維奇 著</strong>（適合 Elo 1400+）<br>
+            現代超前思維奠基作：深入剖析「預防性思維 (Prophylaxis)」、開放線控制與兵鏈根基。</p>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -2016,6 +2410,22 @@
       const dynamicHint = `點選 ${startSq} 的${moverName}，${actionText}，${goalText}`;
       const turnPrefix = turn === 'b' ? '【黑方反擊】' : '';
 
+      // Strategic 4-Elements & Elo metadata mapping (Based on Chess Study Report)
+      let meta = null;
+      if (id <= 40) {
+        meta = STRATEGIC_METADATA_TABLE[id - 1];
+      } else if (tpl.themeKey && PROCEDURAL_META_MAP[tpl.themeKey]) {
+        meta = PROCEDURAL_META_MAP[tpl.themeKey];
+      }
+      if (!meta) {
+        meta = {
+          motif: tpl.category || "經典戰術幾何",
+          elo: tpl.catClass === 'cat-easy' ? '0-1000' : (tpl.catClass === 'cat-med' ? '1000-1600' : '1600+'),
+          elements: tpl.isMateIn1 ? ['tempo', 'space'] : ['force', 'tempo'],
+          detail: "【時間與節奏 Tempo】塞拉萬四大戰略原則：主動幾何威脅奪取對局主動權。"
+        };
+      }
+
       return {
         id,
         title: `第 ${id} 題：${turnPrefix}${tpl.title}`,
@@ -2029,14 +2439,77 @@
         knowledge: tpl.knowledge,
         initialBoard: board,
         solution: { from: [fr, fc], to: [tr, tc] },
-        hint: dynamicHint
+        hint: dynamicHint,
+        strategicElements: meta.elements,
+        strategicDetail: meta.detail,
+        geometricMotif: meta.motif,
+        eloBand: meta.elo
       };
     }
 
     // ==========================================
+    // STRATEGIC 4-ELEMENTS & ELO METADATA TABLE
+    // ==========================================
+    const PROCEDURAL_META_MAP = {
+      'fork': { motif: "動態騎士捉雙 (Knight Fork)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】塞拉萬四大戰略原則：單子同時威脅多重幾何弱點，迫使對手應接不暇。" },
+      'queen_fork': { motif: "皇后十字雙擊 (Queen Fork)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 空間 Space】利用皇后米字形八向射程，一子雙責同時將軍與掠奪落單重車。" },
+      'bishop_fork': { motif: "主教大斜線雙擊 (Bishop Fork)", elo: "1000-1600", elements: ["force", "space"], detail: "【空間 Space & 子力 Force】主教佔據中心交叉樞紐，雙向大斜線同時鎖定兩顆落單大子。" },
+      'pawn_fork': { motif: "中路小兵挺身捉雙 (Pawn Fork)", elo: "0-1000", elements: ["force", "pawn"], detail: "【兵形結構 Pawn & 子力 Force】價值僅 1 分的小兵以小博大，同時雙擊兩顆大子，穩賺子力優勢。" },
+      'bishop_pin': { motif: "長斜線絕對牽制 (Bishop Pin)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space & 牽制】因身後是國王，被絕對牽制的棋子動彈不得，防守徹底癱瘓。" },
+      'skewer': { motif: "長程直線串擊 (Rook Skewer)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】串擊：先攻擊前方高價值國王，迫其閃開收割後方大子。" },
+      'backrank': { motif: "底線 Checkmate (Back Rank)", elo: "0-1000", elements: ["space", "tempo"], detail: "【空間 Space】利用敵方王前兵陣阻擋逃生格的缺陷，深入底線完成一擊必殺。" },
+      'hanging': { motif: "掃除無根懸空子 (Hanging Piece)", elo: "0-1000", elements: ["force"], detail: "【子力 Force】菲舍爾程式化原則：時刻檢查棋盤上無保護的大子，消除送子並及時吃子。" },
+      'anastasia': { motif: "安娜斯塔西亞殺 (Anastasia Mate)", elo: "1600+", elements: ["space", "pawn"], detail: "【空間 Space & 兵形 Pawn】騎士卡死敵王側翼逃生格，調動重車轉移至開放邊線完成傳奇絕殺。" }
+    };
+
+    const STRATEGIC_METADATA_TABLE = [
+      { motif: "歌劇院殺法 (Opera Mate)", elo: "1600+", elements: ["space", "tempo"], detail: "【空間 Space & 節奏 Tempo】摩菲名言：寧舍子力亦要維持攻勢動能。主教精準封鎖逃生格，重車沉底一擊必殺。" },
+      { motif: "博登雙象殺 (Boden's Mate)", elo: "1600+", elements: ["space", "force"], detail: "【空間 Space & 子力 Force】雙象雙射線交叉剪刀式封鎖，切斷敵王退路並在短翼完成長易位後的致命終結。" },
+      { motif: "第7排盲豬殺 (Blind Swine)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】雙車並肩霸佔第 7 排（次底線），兩台重車相互掩護如入無人之境，橫掃防線。" },
+      { motif: "希臘祭品破王城 (Greek Gift)", elo: "1600+", elements: ["tempo", "space"], detail: "【時間與節奏 Tempo】經典棄象進攻，出子領先轉化為疾風暴雨般的衝刺，騎士在前哨卡位，皇后入城將死。" },
+      { motif: "安娜斯塔西亞殺 (Anastasia's Mate)", elo: "1000-1600", elements: ["space", "pawn"], detail: "【空間 Space & 兵形 Pawn】敵方兵形與我方騎士聯手封死邊線國王退路，重車沿邊翼直線一擊斃命。" },
+      { motif: "千年阿拉伯殺 (Arabian Mate)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space】車與馬在棋盤角落最強默契組合：騎士同時鎖住角落逃生格並保護底線重車。" },
+      { motif: "菲利多爾窒息悶殺 (Smothered Mate)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space】唯有騎士具備越子攻擊特權。當敵王被自己的車兵圍死時，騎士一躍定音。" },
+      { motif: "雙車階梯殺 (Ladder Mate)", elo: "0-1000", elements: ["space", "tempo"], detail: "【空間 Space & 節奏 Tempo】雙重車輪流封鎖相鄰直線或橫排，像割草機般將敵王驅趕至底線處決。" },
+      { motif: "皇家騎士捉雙 (Royal Fork)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】騎士跳入中心要津，同時將軍敵王並鎖死敵后，奪取絕對子力優勢。" },
+      { motif: "家族大捉雙王后車 (Family Fork)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force】單一騎士同時威脅敵方王、后、車三大主力，迫使敵方應將棄子。" },
+      { motif: "中路小兵挺身捉雙 (Pawn Fork)", elo: "0-1000", elements: ["force", "pawn"], detail: "【兵形結構 Pawn & 子力 Force】價值僅 1 分的小兵以小博大，同時雙擊兩顆大子，穩賺子力優勢。" },
+      { motif: "皇后中心四向大捉雙 (Queen Fork)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】利用皇后米字形八向射程，在將軍敵王的同時獵殺角落無根重車。" },
+      { motif: "主教大斜線雙向捉雙 (Bishop Fork)", elo: "1000-1600", elements: ["force", "space"], detail: "【子力 Force & 空間 Space】主教佔據中心交叉樞紐，雙向大斜線同時鎖定兩顆落單大子。" },
+      { motif: "抽將閃擊掠奪皇后 (Discovered Check)", elo: "1600+", elements: ["tempo", "force"], detail: "【時間與節奏 Tempo】前線棋子移開亮出後方重砲抽將，迫使對手應將，前子趁機無償吃后。" },
+      { motif: "雙重將軍絕殺 (Double Check)", elo: "1600+", elements: ["tempo", "space"], detail: "【時間與節奏 Tempo】兩顆棋子同時將軍時，一切擋將或吃子手段全數無效，敵王必須逃跑，逃無可逃即將死。" },
+      { motif: "重車第7排將軍捉雙 (Rook Fork)", elo: "1000-1600", elements: ["force", "space"], detail: "【子力 Force & 空間 Space】重車切入敵方第 7 橫排，橫掃底線並將軍捉雙無根主教。" },
+      { motif: "主教大斜線絕對牽制 (Bishop Pin)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space & 牽制】因重車身後是國王，被絕對牽制的重車完全動彈不得，防守徹底癱瘓。" },
+      { motif: "重車開放線絕對牽制 (Rook Pin)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space & 牽制】主教無法直走反吃重車，一旦與國王處於同一直線被釘死，即插翅難飛。" },
+      { motif: "重車直線暴力串擊王后 (Rook Skewer)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】先將軍前方高價值國王，迫其閃避後長驅直入穿透吃掉身後皇后。" },
+      { motif: "主教大斜線凌厲串擊 (Bishop Skewer)", elo: "1000-1600", elements: ["force", "space"], detail: "【子力 Force & 空間 Space】對角線穿透射擊，穿過前方的國王收割後方無保護的重車。" },
+      { motif: "皇后大斜線遠程串擊 (Queen Skewer)", elo: "1600+", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】在開闊局面中利用皇后長程斜向穿透力，逼王讓路並收割敵后。" },
+      { motif: "利用絕對牽制白吃敵后 (Pinned Defender)", elo: "1600+", elements: ["force", "space"], detail: "【子力 Force & 牽制】被牽制的防守小兵無法移開吃子，其所守護的皇后實為懸空子，可大膽吃下。" },
+      { motif: "牽制掩護側翼絕殺 (Pin-Mate)", elo: "1600+", elements: ["space", "tempo"], detail: "【空間 Space & 節奏 Tempo】敵王身側防守小兵被牽制失去吃子能力，白車直接貼身絕殺。" },
+      { motif: "重車第7排橫向串擊王車 (Horizontal Skewer)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】利用第 7 橫排橫向穿透射程，將軍敵王並收割後方重車。" },
+      { motif: "雙兵封路燕尾殺 (Swallowtail Mate)", elo: "1000-1600", elements: ["space", "pawn"], detail: "【空間 Space & 兵形 Pawn】敵王身後兩側退路被己方小兵堵死，皇后在主教保護下正面貼臉絕殺。" },
+      { motif: "鳩尾斜角吻殺 (Dovetail Mate)", elo: "1000-1600", elements: ["space", "tempo"], detail: "【空間 Space & 節奏 Tempo】皇后貼身封鎖縱橫逃生格，敵王僅存對角逃生格被己方重子阻斷。" },
+      { motif: "肩章雙車夾王絕殺 (Epaulette Mate)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space】敵王兩側緊鄰的逃生格被自己的雙車像肩章般封死，皇后正面一擊斃命。" },
+      { motif: "后象電池大斜線吻殺 (Battery Mate)", elo: "0-1000", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】主教在後、皇后在前組成強大砲台電池，大斜線長驅直入貼臉絕殺。" },
+      { motif: "達米亞諾后兵聯攻殺 (Damiano's Mate)", elo: "0-1000", elements: ["pawn", "space"], detail: "【兵形結構 Pawn & 空間 Space】深入敵營的先鋒小兵既是皇后的保鏢，又封鎖了敵王的斜向逃生。" },
+      { motif: "小兵立大功貼身絕殺 (Pawn Mate)", elo: "0-1000", elements: ["pawn", "space"], detail: "【兵形結構 Pawn & 空間 Space】當敵王被己方大子團團困在角落時，一枚小兵推進一步即可完成絕殺。" },
+      { motif: "通行兵升變直接將死 (Promotion Mate)", elo: "0-1000", elements: ["pawn", "force"], detail: "【兵形結構 Pawn & 子力 Force】通路兵（Passed Pawn）抵達底線升變為皇后的瞬間，直接將死敵王。" },
+      { motif: "王車對峙走廊絕殺 (Corridor Mate)", elo: "0-1000", elements: ["space", "tempo"], detail: "【空間 Space】王之對峙（Opposition）封死敵王向前格，重車沉底完成教科書級定式將死。" },
+      { motif: "天羅地網困斃敵后 (Trapped Queen)", elo: "1600+", elements: ["space", "force"], detail: "【空間 Space & 子力 Force】敵后貪吃深入險境，跳動騎士精準封鎖其僅存逃生格，將敵后生擒。" },
+      { motif: "棄子引離底線防守車 (Deflection Mate)", elo: "1600+", elements: ["tempo", "space"], detail: "【時間與節奏 Tempo & 空間 Space】利用重車直接消滅底線最後守衛，迫敵子離崗並完成將死。" },
+      { motif: "掠奪中心無根懸空皇后 (Hanging Queen)", elo: "0-1000", elements: ["force"], detail: "【子力 Force】菲舍爾程式化原則：時刻檢查棋盤上的無根懸空子（Hanging Pieces），免費吃子得勝。" },
+      { motif: "拔除王翼防守車絕殺 (Eliminate Guard)", elo: "1000-1600", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】拔除防禦關鍵鎖柱，皇后以迅雷不及掩耳之勢吃掉底線防守車。" },
+      { motif: "關門打狗困斃貪吃主教 (Trapped Bishop)", elo: "1000-1600", elements: ["space", "force"], detail: "【空間 Space & 子力 Force】敵方主教深入邊線吃兵缺乏退路，橫移重車關門捉賊得子。" },
+      { motif: "擊潰超載防守者絕殺 (Overloaded Defender)", elo: "1600+", elements: ["force", "tempo"], detail: "【子力 Force & 節奏 Tempo】兩台重車疊在開放線上形成重砲疊加，敵方單一防守者不堪負荷當場被擊潰。" },
+      { motif: "遠程狙擊無保護落單重車 (Sniping Rook)", elo: "0-1000", elements: ["force", "space"], detail: "【子力 Force & 空間 Space】側翼主教（Fianchetto）穿透整個大斜線，直接捕獲對角線遺忘防守之重車。" },
+      { motif: "后車配合破除底線屏障 (Back-Rank Demolition)", elo: "1000-1600", elements: ["force", "space"], detail: "【子力 Force & 空間 Space】集中優勢火力於一點，雙重子強行撕破敵方底線屏障絕殺。" }
+    ];
+
+    // ==========================================
     // GAME STATE & PERSISTENT PROGRESS
     // ==========================================
-    let currentFilter = 'all';
+    let currentThemeFilter = 'all';
+    let currentEloFilter = 'all';
     let currentPuzzleId = 1;
     let currentPuzzle = getPuzzle(1);
     let currentBoard = JSON.parse(JSON.stringify(currentPuzzle.initialBoard));
@@ -2069,13 +2542,219 @@
       } catch (e) {}
     }
 
+    // ==========================================
+    // THE WOODPECKER METHOD (CYCLE TRAINING ENGINE)
+    // ==========================================
+    let isWoodpeckerMode = false;
+    let woodpeckerCycle = 1;
+    let woodpeckerSetSize = 10;
+    let woodpeckerPuzzles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let woodpeckerCurrentIndex = 0;
+    let woodpeckerTimer = null;
+    let woodpeckerElapsedSeconds = 0;
+    let woodpeckerCycle1Seconds = null;
+    let woodpeckerTargetSeconds = null;
+    let woodpeckerCorrectCount = 0;
+    let woodpeckerAttemptCount = 0;
+
+    function toggleWoodpeckerMode() {
+      isWoodpeckerMode = !isWoodpeckerMode;
+      const panel = document.getElementById('woodpecker-panel');
+      const btn = document.getElementById('btn-toggle-woodpecker');
+      if (isWoodpeckerMode) {
+        if (panel) panel.classList.add('active');
+        if (btn) {
+          btn.classList.add('active');
+          btn.innerText = '🐦 啄木鳥模式：進行中 (點擊退出)';
+        }
+        initWoodpeckerTraining();
+      } else {
+        if (panel) panel.classList.remove('active');
+        if (btn) {
+          btn.classList.remove('active');
+          btn.innerText = '🐦 開啟啄木鳥循環訓練 (The Woodpecker Method)';
+        }
+        stopWoodpeckerTimer();
+      }
+    }
+
+    function initWoodpeckerTraining() {
+      woodpeckerCycle = 1;
+      woodpeckerElapsedSeconds = 0;
+      woodpeckerCorrectCount = 0;
+      woodpeckerAttemptCount = 0;
+      woodpeckerCycle1Seconds = null;
+      woodpeckerTargetSeconds = null;
+      generateWoodpeckerSet();
+      startWoodpeckerCycle(1);
+    }
+
+    function generateWoodpeckerSet() {
+      const pool = [];
+      for (let i = 1; i <= Math.min(woodpeckerSetSize, 40); i++) {
+        pool.push(i);
+      }
+      woodpeckerPuzzles = pool;
+    }
+
+    function setWoodpeckerSetSize(size) {
+      woodpeckerSetSize = size;
+      const b10 = document.getElementById('wp-btn-set-10');
+      const b25 = document.getElementById('wp-btn-set-25');
+      if (b10) b10.classList.toggle('active', size === 10);
+      if (b25) b25.classList.toggle('active', size === 25);
+      initWoodpeckerTraining();
+    }
+
+    function startWoodpeckerCycle(cycleNum) {
+      woodpeckerCycle = cycleNum;
+      woodpeckerCurrentIndex = 0;
+      woodpeckerElapsedSeconds = 0;
+      woodpeckerCorrectCount = 0;
+      woodpeckerAttemptCount = 0;
+
+      const cycleBadge = document.getElementById('wp-cycle-badge');
+      const cycleNames = [
+        "週期 1 / 4：建立初始計算鏈與印象",
+        "週期 2 / 4：時間減半！激活主動回想",
+        "週期 3 / 4：極速衝刺！強化圖式識別",
+        "最終週期：全自動化直覺反射 (System 1)"
+      ];
+      if (cycleBadge) cycleBadge.innerText = cycleNames[cycleNum - 1] || `週期 ${cycleNum}`;
+
+      const targetEl = document.getElementById('wp-metric-target');
+      if (targetEl) {
+        if (cycleNum === 1) {
+          woodpeckerTargetSeconds = null;
+          targetEl.innerText = "基準建立中";
+          targetEl.style.color = "#f59e0b";
+        } else if (woodpeckerCycle1Seconds) {
+          woodpeckerTargetSeconds = Math.max(5, Math.floor(woodpeckerCycle1Seconds / Math.pow(2, cycleNum - 1)));
+          targetEl.innerText = formatTime(woodpeckerTargetSeconds);
+          targetEl.style.color = "#38bdf8";
+        }
+      }
+
+      startWoodpeckerTimer();
+      loadPuzzle(woodpeckerPuzzles[0]);
+      updateWoodpeckerHUD();
+    }
+
+    function startWoodpeckerTimer() {
+      if (woodpeckerTimer) clearInterval(woodpeckerTimer);
+      woodpeckerTimer = setInterval(() => {
+        woodpeckerElapsedSeconds++;
+        updateWoodpeckerHUD();
+      }, 1000);
+    }
+
+    function stopWoodpeckerTimer() {
+      if (woodpeckerTimer) {
+        clearInterval(woodpeckerTimer);
+        woodpeckerTimer = null;
+      }
+    }
+
+    function formatTime(totalSec) {
+      if (isNaN(totalSec) || totalSec === null) return "--:--";
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateWoodpeckerHUD() {
+      const timerEl = document.getElementById('wp-metric-timer');
+      if (timerEl) {
+        timerEl.innerText = formatTime(woodpeckerElapsedSeconds);
+        if (woodpeckerTargetSeconds && woodpeckerElapsedSeconds > woodpeckerTargetSeconds) {
+          timerEl.style.color = "#f87171";
+        } else {
+          timerEl.style.color = "#60a5fa";
+        }
+      }
+      const progEl = document.getElementById('wp-metric-progress');
+      if (progEl) progEl.innerText = `${woodpeckerCurrentIndex + 1} / ${woodpeckerPuzzles.length}`;
+
+      const fillEl = document.getElementById('wp-progress-fill');
+      if (fillEl) {
+        const pct = Math.round(((woodpeckerCurrentIndex + 1) / woodpeckerPuzzles.length) * 100);
+        fillEl.style.width = pct + '%';
+      }
+
+      const accEl = document.getElementById('wp-metric-accuracy');
+      if (accEl) {
+        const acc = woodpeckerAttemptCount === 0 ? 100 : Math.round((woodpeckerCorrectCount / woodpeckerAttemptCount) * 100);
+        accEl.innerText = acc + '%';
+      }
+
+      const avgEl = document.getElementById('wp-metric-avg');
+      if (avgEl) {
+        const avg = woodpeckerCurrentIndex === 0 ? '--' : (woodpeckerElapsedSeconds / (woodpeckerCurrentIndex + 1)).toFixed(1);
+        avgEl.innerText = avg + 's';
+      }
+    }
+
+    function restartWoodpeckerCycle() {
+      startWoodpeckerCycle(woodpeckerCycle);
+    }
+
+    function handleWoodpeckerSolve() {
+      woodpeckerCorrectCount++;
+      woodpeckerAttemptCount++;
+      updateWoodpeckerHUD();
+
+      if (woodpeckerCurrentIndex + 1 >= woodpeckerPuzzles.length) {
+        stopWoodpeckerTimer();
+        setTimeout(handleWoodpeckerCycleComplete, 600);
+      } else {
+        woodpeckerCurrentIndex++;
+        setTimeout(() => {
+          loadPuzzle(woodpeckerPuzzles[woodpeckerCurrentIndex]);
+          updateWoodpeckerHUD();
+        }, 900);
+      }
+    }
+
+    function handleWoodpeckerCycleComplete() {
+      const totalSec = woodpeckerElapsedSeconds;
+      const acc = Math.round((woodpeckerCorrectCount / Math.max(1, woodpeckerAttemptCount)) * 100);
+
+      if (woodpeckerCycle === 1) {
+        woodpeckerCycle1Seconds = totalSec;
+        const nextTarget = Math.floor(totalSec / 2);
+        alert(`🎉 恭喜完成啄木鳥【週期 1】！\n\n⏱️ 總耗時：${formatTime(totalSec)}\n🎯 正確率：${acc}%\n\n大腦神經網絡已建立初始計算鏈！\n即將進入【週期 2】：目標時間減半至 ${formatTime(nextTarget)}，全面激活主動回想！`);
+        startWoodpeckerCycle(2);
+      } else if (woodpeckerCycle === 2) {
+        const nextTarget = Math.floor(woodpeckerCycle1Seconds / 4);
+        alert(`🚀 恭喜完成啄木鳥【週期 2】！\n\n⏱️ 本輪耗時：${formatTime(totalSec)} (目標: ${formatTime(woodpeckerTargetSeconds)})\n🎯 正確率：${acc}%\n\n計算遲滯大幅縮減！\n即將進入【週期 3】：極速模式（目標 ${formatTime(nextTarget)}），強化圖式識別！`);
+        startWoodpeckerCycle(3);
+      } else if (woodpeckerCycle === 3) {
+        alert(`⚡ 恭喜完成啄木鳥【週期 3】！\n\n⏱️ 本輪耗時：${formatTime(totalSec)}\n🎯 正確率：${acc}%\n\n即將挑戰【最終週期】：秒級直覺反射，挑戰零秒思考！`);
+        startWoodpeckerCycle(4);
+      } else {
+        alert(`👑 完美達成特級大師「啄木鳥訓練法」全部週期！\n\n從初始 ${formatTime(woodpeckerCycle1Seconds)} 飛速進步至 ${formatTime(totalSec)}！\n您的大腦已成功將該題組的戰術圖式完全內化為「系統一直覺模式」！🏆`);
+        toggleWoodpeckerMode();
+      }
+    }
+
     function setThemeFilter(theme) {
-      currentFilter = theme;
-      document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+      currentThemeFilter = theme;
+      document.querySelectorAll('.filter-bar .filter-pill').forEach(btn => btn.classList.remove('active'));
       const activePill = document.getElementById('filter-' + theme);
       if (activePill) activePill.classList.add('active');
 
-      if (!matchesFilter(currentPuzzle, currentFilter)) {
+      if (!matchesFilter(currentPuzzle, currentThemeFilter, currentEloFilter)) {
+        nextTactic();
+      }
+    }
+
+    function setEloFilter(band) {
+      currentEloFilter = band;
+      document.querySelectorAll('.filter-bar-sub .pill-elo').forEach(btn => btn.classList.remove('active'));
+      const activePill = document.getElementById('filter-elo-' + (band === '1600+' ? '1600' : band));
+      if (activePill) activePill.classList.add('active');
+
+      if (!matchesFilter(currentPuzzle, currentThemeFilter, currentEloFilter)) {
         nextTactic();
       }
     }
@@ -2134,6 +2813,37 @@
       ratingEl.style.color = p.catClass === 'cat-easy' ? '#4ade80' : (p.catClass === 'cat-med' ? '#fbbf24' : '#f87171');
 
       document.getElementById('puzzle-knowledge').innerText = p.knowledge;
+
+      // Render Strategic 4-Elements & Geometric Motif Badges
+      const stratContainer = document.getElementById('puzzle-strategic-tags');
+      if (stratContainer) {
+        stratContainer.innerHTML = '';
+        const elements = p.strategicElements || ['force', 'tempo'];
+        const tagMap = {
+          'force': { label: '子力 Force', cls: 'strat-force', icon: '🔴' },
+          'tempo': { label: '節奏 Tempo', cls: 'strat-tempo', icon: '🟡' },
+          'space': { label: '空間 Space', cls: 'strat-space', icon: '🔵' },
+          'pawn': { label: '兵形 Structure', cls: 'strat-pawn', icon: '🟢' }
+        };
+        elements.forEach(k => {
+          const item = tagMap[k] || { label: k, cls: 'strat-force', icon: '•' };
+          const span = document.createElement('span');
+          span.className = `strategic-tag ${item.cls}`;
+          span.innerHTML = `<span>${item.icon}</span> ${item.label}`;
+          stratContainer.appendChild(span);
+        });
+      }
+
+      const motifBadge = document.getElementById('puzzle-motif-badge');
+      if (motifBadge) {
+        motifBadge.innerText = p.geometricMotif || p.category;
+      }
+
+      const stratDetail = document.getElementById('puzzle-strategic-detail');
+      if (stratDetail) {
+        stratDetail.innerText = p.strategicDetail || "戰略思考：藉由主動幾何打擊奪取對局主動權，建立子力優勢。";
+      }
+
       document.getElementById('tactics-to-move').innerText = p.turn === 'w' ? '⚪ 白先走 (White to Move)' : '⚫ 黑先走 (Black to Move)';
       const turnDot = document.getElementById('turn-dot');
       if (turnDot) {
@@ -2276,12 +2986,16 @@
         feedback.style.display = 'block';
         feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${p.knowledge}`;
 
-        const autoNext = document.getElementById('auto-next-toggle');
-        if (autoNext && autoNext.checked) {
-          if (autoNextTimer) clearTimeout(autoNextTimer);
-          autoNextTimer = setTimeout(() => {
-            if (puzzleSolved) nextTactic();
-          }, 1100);
+        if (isWoodpeckerMode) {
+          handleWoodpeckerSolve();
+        } else {
+          const autoNext = document.getElementById('auto-next-toggle');
+          if (autoNext && autoNext.checked) {
+            if (autoNextTimer) clearTimeout(autoNextTimer);
+            autoNextTimer = setTimeout(() => {
+              if (puzzleSolved) nextTactic();
+            }, 1100);
+          }
         }
       } else {
         // Legal move, but not the best tactical move
@@ -2291,6 +3005,10 @@
         feedback.className = 'feedback-box error';
         feedback.style.display = 'block';
         feedback.innerHTML = `❌ <strong>這步棋雖然合法，但不是最佳戰術解！</strong> 再觀察看看，或點擊「💡 提示」！`;
+        if (isWoodpeckerMode) {
+          woodpeckerAttemptCount++;
+          updateWoodpeckerHUD();
+        }
         selectedSquare = null;
         selectedLegalMoves = [];
         renderTacticsBoard();
@@ -2339,24 +3057,36 @@
       renderTacticsBoard();
     }
 
-    function matchesFilter(puzzle, filter) {
-      if (filter === 'all') return true;
-      if (filter === 'classic') return puzzle.themeKey === 'classic' || puzzle.category.includes('大師') || puzzle.category.includes('經典');
-      if (filter === 'fork') return puzzle.themeKey === 'fork' || puzzle.category.includes('捉雙') || puzzle.category.includes('抽將');
-      if (filter === 'skewer') return puzzle.themeKey === 'skewer' || puzzle.category.includes('串擊') || puzzle.category.includes('牽制');
-      if (filter === 'mate1') return puzzle.isMateIn1;
-      if (filter === 'blackMove') return puzzle.turn === 'b';
-      if (filter === 'hanging') return puzzle.themeKey === 'hanging' || puzzle.category.includes('困子') || puzzle.category.includes('消除') || puzzle.category.includes('引離');
-      return puzzle.themeKey === filter;
+    function matchesFilter(puzzle, themeFilter, eloFilter) {
+      if (typeof themeFilter === 'undefined') themeFilter = currentThemeFilter;
+      if (typeof eloFilter === 'undefined') eloFilter = currentEloFilter;
+
+      // 1. Elo Rating Band Filter
+      if (eloFilter && eloFilter !== 'all') {
+        if (puzzle.eloBand !== eloFilter) return false;
+      }
+
+      // 2. Tactical Theme Filter (Geometric Motifs based on Study Report)
+      if (!themeFilter || themeFilter === 'all') return true;
+      if (themeFilter === 'classic') return puzzle.themeKey === 'classic' || puzzle.category.includes('大師') || puzzle.category.includes('名局') || puzzle.category.includes('經典');
+      if (themeFilter === 'fork') return puzzle.themeKey === 'fork' || puzzle.themeKey === 'queen_fork' || puzzle.themeKey === 'pawn_fork' || puzzle.themeKey === 'bishop_fork' || puzzle.category.includes('捉雙') || puzzle.category.includes('雙擊');
+      if (themeFilter === 'pin') return puzzle.themeKey === 'pin' || puzzle.themeKey === 'bishop_pin' || puzzle.category.includes('牽制');
+      if (themeFilter === 'skewer') return puzzle.themeKey === 'skewer' || puzzle.category.includes('串擊');
+      if (themeFilter === 'discovered') return puzzle.themeKey === 'discovered' || puzzle.category.includes('抽將') || puzzle.category.includes('閃擊') || puzzle.category.includes('雙將');
+      if (themeFilter === 'deflection') return puzzle.themeKey === 'deflection' || puzzle.category.includes('引離') || puzzle.category.includes('消除') || puzzle.category.includes('超載') || puzzle.category.includes('困子');
+      if (themeFilter === 'mate1') return puzzle.isMateIn1;
+      if (themeFilter === 'hanging') return puzzle.themeKey === 'hanging' || puzzle.category.includes('懸空') || puzzle.category.includes('困子') || puzzle.category.includes('無根');
+      if (themeFilter === 'blackMove') return puzzle.turn === 'b';
+      return puzzle.themeKey === themeFilter;
     }
 
     function findMatchingPuzzleId(startId, step) {
       let id = startId;
-      for (let tries = 0; tries < 200; tries++) {
+      for (let tries = 0; tries < 500; tries++) {
         if (id < 1) id = 10000;
         if (id > 10000) id = 1;
         const p = getPuzzle(id);
-        if (matchesFilter(p, currentFilter)) {
+        if (matchesFilter(p, currentThemeFilter, currentEloFilter)) {
           return id;
         }
         id += step;
