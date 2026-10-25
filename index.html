@@ -831,23 +831,23 @@
       <div class="game-layout">
         <div class="board-container">
           <div class="board-header">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">跳動騎士吃掉所有星星 ⭐</span>
-            <span id="knight-step-count" class="category-badge cat-med">步數: 0</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">吃掉所有 ⭐ 並避開 ⛔ 禁區</span>
+            <span id="knight-step-count" class="category-badge cat-med">步數: 0 / 標準: 3</span>
           </div>
 
           <div id="knight-board" class="chess-board"></div>
 
           <div class="board-header" style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">
-            <span>騎士每次跳躍必定改變格子顏色！</span>
+            <span>騎士每次跳躍必換格子顏色！吃完自動進下一關</span>
             <span id="knight-stars-left" style="color: var(--primary); font-weight: 700;">3 ⭐</span>
           </div>
         </div>
 
         <div class="panel-card">
           <div>
-            <h2 class="panel-title">🐴 騎士跳躍路徑運算（無限關卡）</h2>
+            <h2 class="panel-title">🐴 騎士障礙尋路挑戰（無限關卡）</h2>
             <p class="panel-desc" style="margin-top: 4px; font-size: 0.82rem;">
-              騎士是棋盤上唯一能「躍過」其他子的兵種，也是計算雙重威脅（捉雙 Fork）的核心！
+              隨關卡推進將出現<strong>敵方封鎖禁區（⛔ 紅格黑兵）</strong>！規劃最佳日字路線，避開障礙吃光所有星星！
             </p>
           </div>
 
@@ -863,14 +863,14 @@
 
           <div class="btn-row">
             <button onclick="resetKnightGame()" class="btn btn-secondary">🔄 重置本關</button>
-            <button onclick="nextKnightLevel()" class="btn btn-primary">下一關 (無限關卡) ➡️</button>
+            <button onclick="nextKnightLevel()" class="btn btn-primary">跳下一關 ➡️</button>
           </div>
 
           <div class="knowledge-box">
             <div class="knowledge-title">騎士核心幾何學定理</div>
             <div class="knowledge-content" style="font-size: 0.75rem;">
               1. <strong>顏色轉換性：</strong>白格跳黑格、黑格跳白格。同色格子永遠需要<strong>偶數步（2、4步）</strong>才能抵達！<br>
-              2. <strong>中心控制力：</strong>在中心格控制 8 個格子；在邊緣只有 4 格；在角落只有 2 格。
+              2. <strong>障礙繞行：</strong>遇到 ⛔ 禁區時，利用騎士「八方跳躍」特性從側翼繞過封鎖線！
             </div>
           </div>
         </div>
@@ -897,9 +897,15 @@
 
         <div class="panel-card">
           <div>
-            <h2 class="panel-title">♟️ 兵的戰爭 (Pawn Wars 人機對決)</h2>
-            <p class="panel-desc" style="margin-top: 4px; font-size: 0.82rem;">
-              特級大師強烈推薦的新手基本功！無后無車，專注於兵的推進、兵鏈防護、通行兵與王之對峙！
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <h2 class="panel-title">♟️ 兵的戰爭 (人機闖關對決)</h2>
+              <span id="pawnwars-stage-badge" class="category-badge cat-med">第 1 陣</span>
+            </div>
+            <div id="pawnwars-stage-title" style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 4px;">
+              第 1 陣：經典八兵會戰 (Standard 8v8)
+            </div>
+            <p id="pawnwars-stage-desc" class="panel-desc" style="margin-top: 4px; font-size: 0.8rem;">
+              特級大師強烈推薦的基本功！專注於兵的推進、兵鏈防護、製造通行兵與國王御駕親征！
             </p>
           </div>
 
@@ -917,7 +923,8 @@
           </div>
 
           <div class="btn-row" style="margin-top: 10px;">
-            <button onclick="initPawnWars()" class="btn btn-primary" style="flex: 1;">🔄 重新開局</button>
+            <button onclick="initPawnWars()" class="btn btn-secondary" style="flex: 1;">🔄 重置本陣</button>
+            <button onclick="nextPawnWarsStage()" class="btn btn-primary" style="flex: 1.4;">下一關兵陣 ➡️</button>
           </div>
 
           <div class="knowledge-box" style="margin-top: 12px;">
@@ -1180,308 +1187,750 @@
       return board;
     }
 
+    const PIECE_NAMES_ZH = {
+      'P': '白兵 (♙)', 'N': '白騎士 (♘)', 'B': '白主教 (♗)', 'R': '白車 (♖)', 'Q': '白皇后 (♕)', 'K': '白王 (♔)',
+      'p': '黑兵 (♟)', 'n': '黑騎士 (♞)', 'b': '黑主教 (♝)', 'r': '黑車 (♜)', 'q': '黑皇后 (♛)', 'k': '黑王 (♚)'
+    };
+
+    function sqName(r, c) {
+      return FILES[c] + RANKS[r];
+    }
+
+    function swapCase(ch) {
+      if (!ch) return '';
+      return ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase();
+    }
+
+    function verifyTacticalBoard(board, fr, fc, tr, tc, turn, isMateIn1) {
+      const enemy = turn === 'w' ? 'b' : 'w';
+      if (!board[fr] || !board[fr][fc]) return false;
+      if (getColor(board[fr][fc]) !== turn) return false;
+      if (isInCheck(board, enemy)) return false;
+      if (isInCheck(board, turn)) return false;
+      const legals = getLegalMoves(board, fr, fc);
+      if (!legals.some(([mr, mc]) => mr === tr && mc === tc)) return false;
+      const after = makeMove(board, fr, fc, tr, tc);
+      if (isMateIn1 && !isCheckmate(after, enemy)) return false;
+      return true;
+    }
+
+    function tryShiftBoard(board, fr, fc, tr, tc, dr, dc, turn, isMateIn1) {
+      if (dr === 0 && dc === 0) return null;
+      const next = emptyBoard();
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) return null;
+            if ((p === 'P' || p === 'p') && (nr === 0 || nr === 7)) return null;
+            next[nr][nc] = p;
+          }
+        }
+      }
+      const nfr = fr + dr, nfc = fc + dc;
+      const ntr = tr + dr, ntc = tc + dc;
+      if (nfr < 0 || nfr >= 8 || nfc < 0 || nfc >= 8 || ntr < 0 || ntr >= 8 || ntc < 0 || ntc >= 8) return null;
+      if (!verifyTacticalBoard(next, nfr, nfc, ntr, ntc, turn, isMateIn1)) return null;
+      return { board: next, fr: nfr, fc: nfc, tr: ntr, tc: ntc };
+    }
+
+    // 40 Master Tactical Templates (8 Classic, 8 Fork, 8 Skewer/Pin, 8 Mate1, 8 Hanging/Deflection)
     const PUZZLE_DATA = [
-      // 1. Morphy's Opera Game (Paul Morphy 1858)
+      // === CLASSIC MATES (8) ===
       {
-        title: "1858 歌劇院不朽棄后絕殺 (Morphy's Opera Mate)",
+        title: "歌劇院不朽棄后絕殺 (Morphy's Opera Mate)",
         category: "大師名局絕殺", themeKey: "classic", catClass: "cat-hard", rating: "名局 ★★★★☆",
         turn: "w", isMateIn1: true,
-        desc: "保羅·摩菲在巴黎歌劇院棄后之後的歷史終局！白主教在 g5 封鎖 e7 並守護 d8。找出白車的一擊必殺！",
-        knowledge: "歌劇院之局（Opera Game）是西洋棋史最著名的傳世名局，展現了出子速度、開放線與主教掩護的極致殺法！",
+        desc: "摩菲在巴黎歌劇院棄后後的傳奇終局！主教在旁掩護，車直衝底線完成將死！",
+        knowledge: "歌劇院殺法（Opera Mate）：利用主教保護底線格，重車沉底一擊必殺被己方棋子阻擋退路的敵王！",
         fen: "1n2k2r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4",
-        from: [7, 3], to: [0, 3],
-        hint: "點選 d1 的白車 (♖)，直衝 d8 底線在主教掩護下將死黑王！"
+        from: [7, 3], to: [0, 3]
       },
-      // 2. Swallowtail Mate (雙兵封路燕尾殺)
-      {
-        title: "雙兵封路燕尾殺 (Swallowtail Mate)",
-        category: "入門一步殺", themeKey: "mate1", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: true,
-        desc: "黑方雙兵擋在黑王身後兩側，形成如同燕尾般的死局。白皇后直衝黑王正前方將死！",
-        knowledge: "燕尾殺（Swallowtail Mate）：皇后在國王正前方貼身將軍，敵王背後兩側的逃生格剛好被自己的棋子堵死！",
-        fen: "4k3/3p1p2/8/4Q3/8/8/5PPP/4R1K1",
-        from: [3, 4], to: [1, 4],
-        hint: "點選 e5 的白皇后 (♕)，衝入 e7 貼臉將死！"
-      },
-      // 3. Absolute Bishop Pin on Queen (象絕對牽制死后)
-      {
-        title: "象大斜線絕對牽制 (Absolute Pin on Queen)",
-        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-hard", rating: "進階 ★★★☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑方皇后與國王站在同一條大斜線上。調動白主教釘死黑皇后，黑后動彈不得必死無疑！",
-        knowledge: "絕對牽制（Absolute Pin）：當被牽制棋子身後是國王時，該棋子受規則限制絕對不能移動，任由我方宰割！",
-        fen: "4k3/3q4/8/8/8/3B4/PPP2PPP/4K2R",
-        from: [5, 3], to: [3, 1],
-        hint: "點選 d3 的白主教 (♗)，斜推到 b5 絕對牽制黑皇后！"
-      },
-      // 4. Pawn Breakthrough Promotion (通行兵單騎闖關)
-      {
-        title: "通行小兵強行升變 (Pawn Promotion)",
-        category: "兵的殘局", themeKey: "mate1", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "白方小兵已經兵臨底線第 7 排！往前推進一步完成升變為皇后！",
-        knowledge: "兵升變（Pawn Promotion）：小兵抵達第 8 排可立即變身為最強大的皇后，是殘局致勝的關鍵！",
-        fen: "8/4P3/8/8/8/4k3/8/4K3",
-        from: [1, 4], to: [0, 4],
-        hint: "點選 e7 的白兵 (♙)，推進到底線 e8 升變為皇后！"
-      },
-      // 5. Boden's Mate (博登雙象十字交叉絕殺)
       {
         title: "博登雙象十字交叉殺 (Boden's Mate)",
         category: "大師名局絕殺", themeKey: "classic", catClass: "cat-hard", rating: "名局 ★★★★☆",
         turn: "w", isMateIn1: true,
-        desc: "黑方長易位後王翼受阻。兩隻白主教雙劍合璧，沿著兩條交叉大斜線給予黑王致命絕殺！",
-        knowledge: "博登殺（Boden's Mate）：兩隻主教各守一條交叉對角線，如同兩把鋒利的剪刀將敵王剪殺在底線！",
+        desc: "敵王長易位後防線受阻。雙象如兩把鋒利剪刀，沿交叉大斜線給予致命絕殺！",
+        knowledge: "博登殺（Boden's Mate）：兩隻主教分別封鎖兩條交叉對角線，將敵王困死在底線！",
         fen: "2kr1b1r/p2n1ppp/2p1b3/8/5B2/8/PPP1BPPP/2KR3R",
-        from: [6, 4], to: [2, 0],
-        hint: "點選 e2 的白主教 (♗)，斜衝到 a6 交叉將死黑王！"
+        from: [6, 4], to: [2, 0]
       },
-      // 6. Royal Knight Fork (皇家騎士大捉雙)
-      {
-        title: "皇家騎士捉雙王后 (Royal Knight Fork)",
-        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑方國王與皇后同時暴露在騎士射程內。跳入致命中心格，一擊同時鎖定國王與皇后！",
-        knowledge: "皇家捉雙（Royal Fork）：騎士同時攻擊國王與皇后，國王被迫逃跑後，黑方只能眼睜睜看著皇后被吃！",
-        fen: "r3k2r/pppq1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
-        from: [3, 3], to: [2, 5],
-        hint: "點選 d5 的白騎士 (♘)，跳到 f6 將軍同時捉黑后！"
-      },
-      // 7. Black Shock Counterattack: Queen Kiss Mate (黑方絕殺反擊)
-      {
-        title: "黑方絕地反擊皇后吻殺 (Black Queen Kiss Mate)",
-        category: "黑先走戰術", themeKey: "blackMove", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
-        turn: "b", isMateIn1: true,
-        desc: "輪到黑方走棋！黑方騎士已經鎖定 g2 弱點。用黑皇后直接吃入 g2 貼臉將死白王！",
-        knowledge: "黑方同樣能在隊友保護下貼身殺王，在實戰中始終要具備執黑反攻的敏銳嗅覺！",
-        fen: "r4rk1/ppp2ppp/8/8/5n2/6q1/PPP2PPP/R1B1R1K1",
-        from: [5, 6], to: [6, 6],
-        hint: "點選 g3 的黑皇后 (♛)，衝入 g2 在騎士保護下貼臉將死白王！"
-      },
-      // 8. Blind Swine 7th Rank Mate (雙車掃蕩第7排盲豬殘局)
       {
         title: "雙車霸佔第7排盲豬絕殺 (Blind Swine Mate)",
         category: "經典殺局", themeKey: "classic", catClass: "cat-med", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: true,
-        desc: "白方雙車已經成功佔據第 7 橫排！用底線白車衝入 h7 在 7 排白車保護下給予黑王致命絕殺！",
-        knowledge: "盲豬殘局（Blind Swine）：雙車並肩站在第 7 橫排時威力無窮，互相掩護能在底線形成無法逃脫的殺網！",
-        fen: "7k/6R1/8/8/8/8/5PP1/5K1R",
-        from: [7, 7], to: [1, 7],
-        hint: "點選 h1 的白車 (♖)，直衝 h7 在 g7 白車保護下將死黑王！"
+        desc: "雙車並肩橫掃第 7 排！吃掉角落防守兵，在同伴車的掩護下完成盲豬將死！",
+        knowledge: "盲豬殺局（Blind Swine）：雙車佔據第 7 排時互相保護，能直接橫掃敵王防線完成貼身絕殺！",
+        fen: "6rk/5RRp/8/8/8/8/5PP1/6K1",
+        from: [1, 6], to: [1, 7]
       },
-      // 9. Greek Gift King Hunt Mate (希臘祭品破王城)
       {
-        title: "希臘祭品王翼突破殺 (Greek Gift Sacrifice)",
+        title: "希臘祭品后馬破王城 (Greek Gift Mate)",
         category: "大師名局絕殺", themeKey: "classic", catClass: "cat-hard", rating: "進階 ★★★★☆",
         turn: "w", isMateIn1: true,
-        desc: "白方棄象破開 h7 防線後的致命總攻！白皇后衝到底線給予無處藏身的黑王最後一擊！",
-        knowledge: "希臘祭品（Greek Gift）：經典的犧牲象吃 h7 破壞王翼防護，隨後后馬聯攻直取敵王！",
-        fen: "5rk1/5ppp/5N2/7Q/8/8/5PPP/6K1",
-        from: [3, 7], to: [1, 7],
-        hint: "點選 h5 的白皇后 (♕)，直撲 h7 在 f6 騎士掩護下將死黑王！"
+        desc: "棄象破開敵方王翼後的經典總攻！騎士已就位支援，皇后直撲角落完成絕殺！",
+        knowledge: "希臘祭品（Greek Gift）：犧牲主教破開防線後，騎士跳上前哨配合皇后衝入角落將死敵王！",
+        fen: "5rk1/5pp1/8/6NQ/8/8/5PPP/6K1",
+        from: [3, 7], to: [1, 7]
       },
-      // 10. Rook Skewer on King & Queen (重車直線串擊)
-      {
-        title: "重車直線暴力串擊 (Rook Skewer)",
-        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑方國王與皇后排在同一條開放直線上。用白車將軍黑王，逼王閃開後直接收割後方皇后！",
-        knowledge: "串擊（Skewer）：先攻擊價值最高的國王，迫使對手閃避，露出後方防守薄弱的高價值大子！",
-        fen: "4q3/8/8/4k3/8/8/PPP2PPP/3R2K1",
-        from: [7, 3], to: [7, 4],
-        hint: "點選 d1 的白車 (♖)，橫移到 e1 實施直線串擊！"
-      },
-      // 11. Central Pawn Fork (小兵中路挺進捉雙)
-      {
-        title: "中路小兵挺身捉雙 (Central Pawn Fork)",
-        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑方主教與騎士站位密集。推進有白車掩護的小兵，以小博大同時捉雙兩顆黑子！",
-        knowledge: "小兵捉雙（Pawn Fork）：用價值最低的小兵同時威脅對手兩顆大子，對手只能棄車保帥！",
-        fen: "r1bqk2r/pppp1ppp/2n1bn2/8/3P4/2N2N2/PPP2PPP/R1BQKB1R",
-        from: [4, 3], to: [3, 3],
-        hint: "點選 d4 的白兵 (♙)，推進到 d5 同時捉雙黑主教與黑騎士！"
-      },
-      // 12. Smothered Mate (角落窒息悶殺)
-      {
-        title: "角落窒息悶殺 (Smothered Mate)",
-        category: "入門一步殺", themeKey: "mate1", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: true,
-        desc: "黑方國王縮在角落，四周被自己的車和兵塞得水洩不通。跳動白騎士隔空將死黑王！",
-        knowledge: "窒息悶殺（Smothered Mate）：因為只有騎士能越子攻擊，當敵王被自己的棋子團團圍住時，騎士一跳即可悶死敵王！",
-        fen: "6rk/6pp/7N/8/8/8/5PPP/6K1",
-        from: [2, 7], to: [1, 5],
-        hint: "點選 h6 的白騎士 (♘)，跳到 f7 完成窒息悶殺！"
-      },
-      // 13. Family Fork: K + Q + R (家族大捉雙)
-      {
-        title: "家族大捉雙王后車 (Family Fork)",
-        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "跳動白騎士切入黑方後防脆弱點 c7，同時將軍國王、捉黑后、捉黑車！",
-        knowledge: "家族捉雙（Family Fork）：當騎士跳入一個格子能同時威脅國王、皇后與車時，對手陣型將徹底瓦解！",
-        fen: "r3k3/pp1q1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
-        from: [3, 3], to: [1, 2],
-        hint: "點選 d5 的白騎士 (♘)，跳到 c7 發動全盤家族大捉雙！"
-      },
-      // 14. Black Back-Rank Destruction (黑車底線絕殺)
-      {
-        title: "黑方底線倒拔垂楊柳 (Black Back-Rank Mate)",
-        category: "黑先走戰術", themeKey: "blackMove", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
-        turn: "b", isMateIn1: true,
-        desc: "換黑方走！白王被自己的兵困在第 1 排底線。用黑車直搗黃龍，打入底線將死白王！",
-        knowledge: "黑方底線殺：當白方沒有留出「換氣格（Luft）」時，黑方重子沉底即可逆轉乾坤！",
-        fen: "3r2k1/5ppp/8/8/8/8/5PPP/6K1",
-        from: [0, 3], to: [7, 3],
-        hint: "點選 d8 的黑車 (♜)，直衝底線 d1 將死白王！"
-      },
-      // 15. Anastasia's Mate (安娜斯塔西亞殺)
       {
         title: "安娜斯塔西亞傳奇殺局 (Anastasia's Mate)",
         category: "經典殺局", themeKey: "classic", catClass: "cat-med", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: true,
-        desc: "白騎士在 e7 卡死了黑王逃往 g8 與 g6 的所有路徑。白車衝入開放的 h 線完成將死！",
-        knowledge: "安娜斯塔西亞殺（Anastasia’s Mate）：騎士在 e7 封鎖邊緣逃路，車在開放的 h 線直取國王首級！",
+        desc: "騎士卡死敵王側翼逃生格，調動重車轉移至開放邊線完成傳奇絕殺！",
+        knowledge: "安娜斯塔西亞殺（Anastasia’s Mate）：騎士封鎖逃路並與己方小兵形成囚籠，重車沿開放邊線一擊斃命！",
         fen: "7k/4N1p1/8/R7/8/8/5PPP/6K1",
-        from: [3, 0], to: [3, 7],
-        hint: "點選 a5 的白車 (♖)，橫移到 h5 完成將死！"
+        from: [3, 0], to: [3, 7]
       },
-      // 16. Double Check King Hunt (雙重將軍破陣)
       {
-        title: "騎士與車雙重將軍 (Double Check Mate)",
-        category: "抽將與雙將", themeKey: "fork", catClass: "cat-hard", rating: "進階 ★★★★☆",
-        turn: "w", isMateIn1: true,
-        desc: "跳動白騎士發動雙重將軍！車與馬同時將軍，黑王無處遁形直接絕殺！",
-        knowledge: "雙重將軍（Double Check）：前方的騎士跳開自身帶將，同時露出底線車的將軍，對手無法吃子或擋將！",
-        fen: "3rkr2/3p1p2/8/4N3/8/8/5PPP/4R1K1",
-        from: [3, 4], to: [2, 6],
-        hint: "點選 e5 的白騎士 (♘)，跳到 g6 實施雙重將軍絕殺！"
-      },
-      // 17. Deflection of Back-Rank Defender (引離底線防守車)
-      {
-        title: "棄子引離底線防守車 (Deflection)",
-        category: "引離與消除防守", themeKey: "fork", catClass: "cat-hard", rating: "進階 ★★★★☆",
-        turn: "w", isMateIn1: true,
-        desc: "黑方底線原本有車把守。白方棄子引開或消滅關鍵防守者，直接貫穿底線完成將死！",
-        knowledge: "引離戰術（Deflection）：迫使防守某一關鍵格子或線路的敵子離開其防守崗位，隨即給予致命打擊！",
-        fen: "3r2k1/5ppp/8/8/8/8/5PPP/3R2K1",
-        from: [7, 3], to: [0, 3],
-        hint: "點選 d1 的白車 (♖)，直接吃掉 d8 的黑車完成底線將死！"
-      },
-      // 18. Bishop Skewer on King & Rook (象大斜線串擊)
-      {
-        title: "主教大斜線凌厲串擊 (Bishop Skewer)",
-        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑王與黑車位於同一條大斜線上。調動白主教斜向將軍黑王，迫使黑王移開後收割黑車！",
-        knowledge: "主教串擊（Bishop Skewer）：利用主教的長射程，貫穿黑方王車直線！",
-        fen: "6r1/8/8/3k4/8/8/PPB2PPP/4K2R",
-        from: [6, 2], to: [5, 1],
-        hint: "點選 c2 的白主教 (♗)，斜推到 b3 將軍黑王並串擊黑車！"
-      },
-      // 19. Dovetail Mate (鳩尾殺)
-      {
-        title: "鳩尾斜角吻殺 (Dovetail Mate)",
-        category: "入門一步殺", themeKey: "mate1", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: true,
-        desc: "黑王身後的兩條斜向逃生格被自己的重子堵死。移動白皇后在斜角完成鳩尾絕殺！",
-        knowledge: "鳩尾殺（Dovetail Mate）：皇后在國王斜前方一格將軍，敵王的兩個後方斜角被自己的棋子擋住無法後退！",
-        fen: "3rkr2/8/3Q4/6B1/8/8/5PPP/6K1",
-        from: [2, 3], to: [1, 4],
-        hint: "點選 d6 的白皇后 (♕)，前進到 e7 在主教掩護下貼身鳩尾將死！"
-      },
-      // 20. Central Queen Quad-Attack (皇后中心四向捉雙)
-      {
-        title: "皇后中路四向大捉雙 (Central Queen Fork)",
-        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "w", isMateIn1: false,
-        desc: "黑車落單沒有保護。將白皇后推入中央，縱向給黑王將軍，橫向鎖定無防護的黑車！",
-        knowledge: "皇后雙重打擊（Queen Fork）：皇后利用全盤最強的機動力，將軍的同時攻擊無根子！",
-        fen: "r3k3/ppp2ppp/8/8/8/1Q6/PPP2PPP/4K2R",
-        from: [5, 1], to: [5, 4],
-        hint: "點選 b3 的白皇后 (♕)，移到 e3 實施中心捉雙！"
-      },
-      // 21. Black Knight Royal Fork (黑馬反撲捉雙)
-      {
-        title: "黑方騎士絕命捉雙 (Black Knight Fork)",
-        category: "黑先走戰術", themeKey: "blackMove", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
-        turn: "b", isMateIn1: false,
-        desc: "換黑方走！白王與底線大車站位暴露。跳動黑騎士同時將軍國王並捉住白車！",
-        knowledge: "黑方反擊捉雙：隨時留心對手國王與大子的幾何弱點，一招制敵扭轉戰局！",
-        fen: "r1b1k2r/ppp2ppp/8/8/3n4/8/PPP2PPP/R3K2R",
-        from: [4, 3], to: [6, 2],
-        hint: "點選 d4 的黑騎士 (♞)，跳到 c2 同時將軍並捉白車！"
-      },
-      // 22. Arabian Mate (阿拉伯車馬角殺)
-      {
-        title: "經典千年阿拉伯殺 (Arabian Mate)",
+        title: "千年阿拉伯車馬角殺 (Arabian Mate)",
         category: "經典殺局", themeKey: "classic", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: true,
-        desc: "白騎士在 f6 牢牢封鎖了黑王的逃生格並保護 g8。移動白車到 g8 完成傳奇的阿拉伯將死！",
-        knowledge: "阿拉伯殺（Arabian Mate）是有超過千年歷史的古老殺法：由騎士控制角落國王的逃路並保護白車，白車沉底給予致命一擊！",
+        desc: "騎士牢牢鎖死角落敵王退路並保護底線。重車沉底完成流傳千年的阿拉伯絕殺！",
+        knowledge: "阿拉伯殺（Arabian Mate）：車與馬在棋盤角落的最強組合，騎士同時承擔控格與護車雙重任務！",
         fen: "7k/7p/5N2/8/8/8/PPP5/2K3R1",
-        from: [7, 6], to: [0, 6],
-        hint: "點選 g1 的白車 (♖)，直衝底線 g8 將死黑王！"
+        from: [7, 6], to: [0, 6]
       },
-      // 23. Discovered Check Winning Queen (抽將吃后)
+      {
+        title: "菲利多爾角落窒息悶殺 (Smothered Mate)",
+        category: "經典殺局", themeKey: "classic", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵王縮在角落被自己的車與小兵團團圍住。跳動騎士隔空將死敵王！",
+        knowledge: "窒息悶殺（Smothered Mate）：唯有騎士能越子攻擊，當敵王被己方棋子堵死所有去路時，一騎定乾坤！",
+        fen: "6rk/6pp/7N/8/8/8/5PPP/6K1",
+        from: [2, 7], to: [1, 5]
+      },
+      {
+        title: "雙車交錯階梯殺 (Lawnmower Ladder Mate)",
+        category: "經典殺局", themeKey: "classic", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "一車封鎖第 7 排退路，另一車直衝第 8 排底線，雙車合力完成階梯將死！",
+        knowledge: "雙車階梯殺（Ladder Mate）：兩台重車輪流控制相鄰的兩條橫排或直線，把敵王逼入絕境！",
+        fen: "4k3/R7/8/8/8/8/5PPP/1R4K1",
+        from: [7, 1], to: [0, 1]
+      },
+
+      // === FORK & DOUBLE ATTACK (8) ===
+      {
+        title: "皇家騎士大捉雙王后 (Royal Knight Fork)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方國王與皇后同時暴露在騎士射程內。跳入中心格同時將軍並鎖定皇后！",
+        knowledge: "皇家捉雙（Royal Fork）：騎士同時攻擊國王與皇后，敵王被迫應將，皇后必失！",
+        fen: "r3k2r/pppq1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
+        from: [3, 3], to: [2, 5]
+      },
+      {
+        title: "家族大捉雙王后車 (Family Fork K+Q+R)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "跳動騎士切入敵方防線弱點，一舉同時威脅國王、皇后與重車！",
+        knowledge: "家族捉雙（Family Fork）：騎士一跳同時攻擊王、后、車三大主力，瞬間瓦解敵軍！",
+        fen: "r3k3/pp1q1ppp/8/3N4/8/8/PPP2PPP/R1B1K2R",
+        from: [3, 3], to: [1, 2]
+      },
+      {
+        title: "中路小兵挺身捉雙 (Central Pawn Fork)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方兩顆輕子並列在前。推進小兵以小博大，同時捉雙兩顆敵方大子！",
+        knowledge: "小兵捉雙（Pawn Fork）：價值僅 1 分的小兵同時威脅兩顆 3 分以上的子力，穩賺子力優勢！",
+        fen: "r1bqk2r/pppp1ppp/2n1bn2/8/3P4/2N2N2/PPP2PPP/R1BQKB1R",
+        from: [4, 3], to: [3, 3]
+      },
+      {
+        title: "皇后中心四向大捉雙 (Central Queen Fork)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方重車落單無保護。將皇后推入中路，同時將軍敵王並鎖定角落落單重車！",
+        knowledge: "皇后捉雙（Queen Fork）：利用皇后米字形八方射程，在將軍的同時掠奪敵方無根大子！",
+        fen: "r3k3/ppp2ppp/8/8/8/1Q6/PPP2PPP/4K2R",
+        from: [5, 1], to: [5, 4]
+      },
+      {
+        title: "主教對角線雙向捉雙 (Bishop Diagonal Fork)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵王與重車站在同色斜角上。跳出主教踏入交叉中心，同時將軍並攻擊重車！",
+        knowledge: "主教捉雙（Bishop Fork）：主教能沿著兩條斜向分支同時對敵王與無保護大子發動雙擊！",
+        fen: "r5k1/ppp2ppp/8/8/8/8/PPP1BPPP/4K2R",
+        from: [6, 4], to: [4, 2]
+      },
       {
         title: "抽將閃擊掠奪皇后 (Discovered Check)",
         category: "抽將與閃擊", themeKey: "fork", catClass: "cat-hard", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: false,
-        desc: "白車與白馬排在同一線上瞄準黑王。跳動白馬抽將，車將軍的同時白馬攻擊黑皇后！",
-        knowledge: "抽將（Discovered Check）：前方的子移開露出後方重子的將軍，對手必須應將，前方的子就能為所欲為！",
+        desc: "車與馬排在同一直線瞄準敵王。跳開騎士發動閃擊抽將，同時踏入敵后攻擊範圍！",
+        knowledge: "抽將（Discovered Check）：前子移開亮出後方重子將軍，對手忙於救王，前子即可無償吃掉敵后！",
         fen: "4k3/1q1p1p2/8/8/4N3/8/5PPP/4R1K1",
-        from: [4, 4], to: [3, 2],
-        hint: "點選 e4 的白騎士 (♘)，跳到 c5 閃開給車將軍，同時捉黑后！"
+        from: [4, 4], to: [3, 2]
       },
-      // 24. Trapped Queen (困斃深入之敵后)
       {
-        title: "布下天羅地網困斃黑后 (Trapped Queen)",
-        category: "困子戰術", themeKey: "hanging", catClass: "cat-hard", rating: "進階 ★★★☆☆",
+        title: "騎士與車雙重將軍絕殺 (Double Check Mate)",
+        category: "抽將與雙將", themeKey: "fork", catClass: "cat-hard", rating: "進階 ★★★★☆",
+        turn: "w", isMateIn1: true,
+        desc: "跳動騎士發動雙重將軍！車與馬同時將軍，敵王既不能吃子也不能墊子，當場絕殺！",
+        knowledge: "雙重將軍（Double Check）：兩顆棋子同時將軍時，一切擋將或吃子手段全部失效，敵王無路可逃即為將死！",
+        fen: "3rkr2/3p1p2/8/4N3/8/8/5PPP/4R1K1",
+        from: [3, 4], to: [2, 6]
+      },
+      {
+        title: "重車沉底將軍捉雙贏后 (Rook Fork on King & Queen)",
+        category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: false,
-        desc: "黑方皇后貪吃深入險境。調動白子封鎖黑后僅存的逃跑路線，讓黑后插翅難飛！",
-        knowledge: "困子戰術（Trapped Piece）：敏銳察覺敵方大子深入沒有撤退路線，利用己方棋子形成合圍捕殺！",
+        desc: "敵王與敵后同時位於第 7 排！將重車推進第 7 排，將軍敵王並同時攻擊敵后！",
+        knowledge: "車之橫排雙擊：當敵王與大子處於同一橫排時，重車切入即可製造將軍捉雙！",
+        fen: "8/1q2k1pp/8/8/4N3/8/5PPP/2R3K1",
+        from: [7, 2], to: [1, 2]
+      },
+
+      // === PIN & SKEWER (8) ===
+      {
+        title: "主教大斜線絕對牽制死后 (Absolute Bishop Pin)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方皇后與國王處於同一條大斜線上。調動主教釘死敵后，使其動彈不得！",
+        knowledge: "絕對牽制（Absolute Pin）：因身後是國王，被牽制的皇后受規則限制無法移開，只能任人宰割！",
+        fen: "4k3/3q4/8/8/8/3B4/PPP2PPP/4K2R",
+        from: [5, 3], to: [3, 1]
+      },
+      {
+        title: "重車開放線絕對牽制死后 (Absolute Rook Pin)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方皇后擋在敵王正前方。橫移重車佔領開放直線，將敵后死死釘在原地！",
+        knowledge: "直線絕對牽制：皇后雖強，一旦與國王排在同一條直線被敵車鎖定，也無法逃脫！",
+        fen: "4k3/4q3/8/8/8/8/PPP2PPP/2R3K1",
+        from: [7, 2], to: [7, 4]
+      },
+      {
+        title: "重車直線暴力串擊王后 (Rook Skewer K+Q)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵王與敵后排在同一直線上。橫移重車直接將軍敵王，逼王閃避後收割後方皇后！",
+        knowledge: "串擊（Skewer）：與牽制相反，先攻擊前方的國王，強迫其讓路後吃掉身後的高價值大子！",
+        fen: "4q3/8/8/4k3/8/8/PPP2PPP/3R2K1",
+        from: [7, 3], to: [7, 4]
+      },
+      {
+        title: "主教大斜線凌厲串擊 (Bishop Skewer K+R)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵王與重車處於同一條長斜線。調動主教斜向將軍敵王，穿透收割後方重車！",
+        knowledge: "對角線串擊：主教隔空射穿敵王與重車，是殘局反敗為勝的利器！",
+        fen: "6r1/8/8/3k4/8/8/PPB2PPP/4K2R",
+        from: [6, 2], to: [5, 1]
+      },
+      {
+        title: "皇后大斜線遠程串擊 (Queen Diagonal Skewer)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵王與敵后站在同一條大斜線上。移動皇后發動遠程將軍串擊，迫使敵王讓出敵后！",
+        knowledge: "皇后串擊：在開闊局面中，皇后的斜線串擊往往能一舉奪取對方皇后！",
+        fen: "6q1/8/4k3/8/8/8/PP3PPP/3Q2K1",
+        from: [7, 3], to: [5, 1]
+      },
+      {
+        title: "利用絕對牽制白吃敵后 (Exploiting Absolute Pin)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-hard", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方 f7 小兵被白主教死死牽制在國王身前，完全沒有保護 g6 皇后的能力！直接出后吃掉敵后！",
+        knowledge: "虛假保護（Pinned Defender）：被絕對牽制的棋子無法移動吃子，它所防守的大子實質上是無根懸空子！",
+        fen: "5rk1/5ppp/6q1/8/2B5/3Q4/5PPP/6K1",
+        from: [5, 3], to: [2, 6]
+      },
+      {
+        title: "牽制掩護側翼絕殺 (Pin-Mate on Flank)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-hard", rating: "進階 ★★★★☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵方 g7 小兵被白方斜線主教牽制，無法吃入 h6！橫移白車到 h6 完成側翼絕殺！",
+        knowledge: "牽制助殺：當敵王身旁的防守兵被大斜線牽制時，該兵失去防禦力，可大膽貼身絕殺！",
+        fen: "6rk/6p1/3R4/8/3B4/8/5PPP/6K1",
+        from: [2, 3], to: [2, 7]
+      },
+      {
+        title: "重車第7排橫向串擊王車 (Horizontal Rook Skewer)",
+        category: "串擊與牽制", themeKey: "skewer", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵王與敵車同時站在第 7 橫排。將重車推進第 7 排將軍敵王，串擊後方的重車！",
+        knowledge: "橫排串擊：重車衝上第 7 排不僅能威脅敵王，更能利用橫向射程串擊同排落單大子！",
+        fen: "8/r3k3/8/8/8/8/5PP1/6KR",
+        from: [7, 7], to: [1, 7]
+      },
+
+      // === MATE IN 1 PATTERNS (8) ===
+      {
+        title: "雙兵封路燕尾殺 (Swallowtail Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵方雙兵擋住敵王身後兩側退路，形成燕尾死局。皇后切入敵王正前方貼身將死！",
+        knowledge: "燕尾殺（Swallowtail Mate）：皇后在主教掩護下貼臉將軍，敵王背後兩個斜角剛好被自己的棋子堵死！",
+        fen: "4k3/3p1p2/8/6B1/1Q6/8/5PPP/6K1",
+        from: [4, 1], to: [1, 4]
+      },
+      {
+        title: "鳩尾斜角吻殺 (Dovetail Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵王身後兩側被自己的重子卡死。移動皇后在主教掩護下完成斜角鳩尾絕殺！",
+        knowledge: "鳩尾殺（Dovetail Mate）：皇后貼身封鎖所有橫直格，敵王僅存的兩個對角逃生格被己方棋子阻塞！",
+        fen: "3rkr2/8/3Q4/6B1/8/8/5PPP/6K1",
+        from: [2, 3], to: [1, 4]
+      },
+      {
+        title: "肩章雙車夾王絕殺 (Epaulette Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵王左右兩側被自己的兩台車像肩章一樣夾住。皇后正面出擊完成肩章將死！",
+        knowledge: "肩章殺（Epaulette Mate）：敵王兩側緊鄰的逃生格被自己的雙車佔據，皇后正面一擊斃命！",
+        fen: "3rkr2/8/8/8/2Q5/8/5PPP/6K1",
+        from: [4, 2], to: [2, 4]
+      },
+      {
+        title: "象后電池大斜線吻殺 (Battery Kiss Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "主教與皇后組成大斜線重砲電池！皇后直衝敵王跟前，在主教保護下貼臉將死！",
+        knowledge: "后象電池（Queen-Bishop Battery）：主教在後、皇后在前沿同條大斜線推進，貼臉將死無解！",
+        fen: "r4rk1/ppp2ppp/8/8/8/2Q5/PB3PPP/6K1",
+        from: [5, 2], to: [1, 6]
+      },
+      {
+        title: "達米亞諾后兵聯攻殺 (Damiano's Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "前鋒小兵已經推進鎖死逃路並提供支援！皇后衝入角落完成達米亞諾絕殺！",
+        knowledge: "達米亞諾殺（Damiano's Mate）：前鋒小兵既是皇后的保鑣，又同時封鎖敵王斜向逃生格！",
+        fen: "5rk1/5p1p/6P1/7Q/8/8/5PPP/6K1",
+        from: [3, 7], to: [1, 7]
+      },
+      {
+        title: "小兵立大功貼身絕殺 (David & Goliath Pawn Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-easy", rating: "基礎 ★★☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵王被自己的車象與小兵困在角落。推進前鋒小兵，在騎士掩護下給予敵王致命將死！",
+        knowledge: "小兵將死（Pawn Mate）：千萬別小看小兵，當敵王退路被封鎖時，小兵推進一格即可完成絕殺！",
+        fen: "5bkr/6pp/5P2/4N3/8/8/5PPP/6K1",
+        from: [2, 5], to: [1, 5]
+      },
+      {
+        title: "通行兵升變直接將死 (Promotion Checkmate)",
+        category: "兵的殘局", themeKey: "mate1", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "小兵已兵臨城下！往前推進一步升變為皇后，在底線直接將死敵王！",
+        knowledge: "升變絕殺（Promotion Mate）：小兵抵達底線升變為皇后的瞬間，同時完成底線將死！",
+        fen: "6k1/3P1ppp/8/8/8/8/5PPP/6K1",
+        from: [1, 3], to: [0, 3]
+      },
+      {
+        title: "王車協力走廊絕殺 (Box / Corridor Mate)",
+        category: "入門一步殺", themeKey: "mate1", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "雙方國王形成「王之對峙（Opposition）」，封死敵王所有前進格。重車沉底完成將死！",
+        knowledge: "王之對峙殺法：利用己方國王封鎖敵王向前的三個格子，重車直衝底線完成教科書級殘局將死！",
+        fen: "4k3/8/4K3/8/8/8/8/R7",
+        from: [7, 0], to: [0, 0]
+      },
+
+      // === HANGING, DEFLECTION & TRAPPED PIECE (8) ===
+      {
+        title: "布下天羅地網困斃敵后 (Trapped Queen)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-hard", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方皇后貪吃深入險境。跳動騎士封鎖敵后僅存的逃生路線，讓敵后插翅難飛！",
+        knowledge: "困子戰術（Trapped Piece）：當敵方大子深入我方陣地缺乏退路時，精準卡位即可將其生擒！",
         fen: "r1b1kbnr/pp1ppppp/2n5/8/8/2N5/PqPPPPPP/R2QKBNR",
-        from: [5, 2], to: [4, 0],
-        hint: "點選 c3 的白騎士 (♘)，跳到 a4 截斷黑皇后的所有退路！"
+        from: [5, 2], to: [4, 0]
+      },
+      {
+        title: "棄子引離底線防守車 (Deflection Mate)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-hard", rating: "進階 ★★★★☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵方底線有重車駐守。直接出動重車消滅底線防守者，一舉完成底線將死！",
+        knowledge: "消除防守者（Removing the Guard）：當敵王依賴單一棋子防守底線時，直接拔除該防守者即可絕殺！",
+        fen: "3r2k1/5ppp/8/8/1B6/8/5PPP/3R2K1",
+        from: [7, 3], to: [0, 3]
+      },
+      {
+        title: "掠奪中心無根懸空皇后 (Capturing Hanging Queen)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方皇后大意停留在沒有任何保護的中心格！立即出動騎士將其免費吃掉！",
+        knowledge: "吃懸空子（Hanging Piece）：時刻掃描棋盤上沒有保護（無根）的敵方大子，這是實戰最常見的致勝來源！",
+        fen: "r1b1kbnr/pppp1ppp/2n5/4q3/8/5N2/PPPPPPPP/RNBQKB1R",
+        from: [5, 5], to: [3, 4]
+      },
+      {
+        title: "拔除王翼防守車絕殺 (Eliminate Guard Mate)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "騎士在前哨虎視眈眈，敵方僅靠底線重車防守。出動皇后直接吃掉敵車完成將死！",
+        knowledge: "破防絕殺：利用騎士封鎖逃生格並提供保護，皇后直接吃掉底線最後的防守重車！",
+        fen: "4r2k/5ppp/5N2/8/8/8/5PPP/4Q1K1",
+        from: [7, 4], to: [0, 4]
+      },
+      {
+        title: "關門打狗困斃貪吃主教 (Trapping the Bishop)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方主教深入邊翼貪吃小兵。橫移重車直接捉死無路可逃的敵方主教！",
+        knowledge: "關門捉賊：當敵方主教深入邊角吃兵時，往往只有一條退路，封鎖退路並直接攻擊即可得子！",
+        fen: "rnbqk1nr/pppp1ppp/8/8/8/2P5/Pb1PPPPP/R1BQKBNR",
+        from: [7, 0], to: [7, 1]
+      },
+      {
+        title: "擊潰超載防守者絕殺 (Overloaded Defender)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-hard", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "敵王底線空虛，雙車疊加在開放線上。前車直接衝入底線吃掉防守車完成將死！",
+        knowledge: "重子疊加（Doubled Rooks）：兩台重車疊在同一條開放直線上，破防威力倍增，敵方單車無法抵擋！",
+        fen: "3r2k1/5ppp/8/8/8/3R4/5PPP/3R2K1",
+        from: [5, 3], to: [0, 3]
+      },
+      {
+        title: "遠程狙擊無保護落單重車 (Sniping Undefended Rook)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-easy", rating: "入門 ★☆☆☆☆",
+        turn: "w", isMateIn1: false,
+        desc: "敵方角落的重車在長斜線上完全沒有遮蔽與保護！出動大斜線主教直接收割！",
+        knowledge: "大斜線狙擊：側翼主教（Fianchetto）常能穿透整個棋盤，直接吃掉對角線另一端忘記防守的重車！",
+        fen: "r3k1nr/p1ppbp1p/np4p1/8/8/6P1/PPPPPPBP/RNBQK1NR",
+        from: [6, 6], to: [0, 0]
+      },
+      {
+        title: "后車配合破除底線屏障 (Back-Rank Demolition)",
+        category: "困子與消除", themeKey: "hanging", catClass: "cat-med", rating: "進階 ★★★☆☆",
+        turn: "w", isMateIn1: true,
+        desc: "皇后與重車同時瞄準底線防守車。用皇后直接吃入底線完成絕殺！",
+        knowledge: "火力集中原則：當我方兩件重子同時攻擊敵方底線唯一防守者時，可直接強行破門將死！",
+        fen: "4r1k1/5ppp/8/8/8/4Q3/5PPP/4R1K1",
+        from: [5, 4], to: [0, 4]
       }
     ];
 
+    // 64-Square Procedural Tactical Synthesizer for infinite non-repeating challenges
+    function generateProceduralTactic(id, rng) {
+      const themes = ['classic', 'fork', 'skewer', 'mate1', 'hanging'];
+      const theme = themes[(id * 7) % themes.length];
+      const turn = (id % 3 === 0) ? 'b' : 'w';
+      const P = (ch) => turn === 'w' ? ch.toUpperCase() : ch.toLowerCase();
+      const E = (ch) => turn === 'w' ? ch.toLowerCase() : ch.toUpperCase();
+
+      for (let attempt = 0; attempt < 45; attempt++) {
+        const b = emptyBoard();
+        let fr, fc, tr, tc, isMateIn1 = false, title = '', category = '', desc = '', knowledge = '', catClass = 'cat-med', rating = '進階 ★★★☆☆';
+
+        if (theme === 'fork') {
+          if (attempt % 2 === 0) {
+            const kOffsets = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+            tr = 2 + Math.floor(rng() * 4);
+            tc = 2 + Math.floor(rng() * 4);
+            const i1 = Math.floor(rng() * 8);
+            const i2 = (i1 + 1 + Math.floor(rng() * 6)) % 8;
+            const i3 = (i1 + 4 + Math.floor(rng() * 3)) % 8;
+            if (i1 === i2 || i1 === i3 || i2 === i3) continue;
+            const [ekr, ekc] = [tr + kOffsets[i1][0], tc + kOffsets[i1][1]];
+            const [eqr, eqc] = [tr + kOffsets[i2][0], tc + kOffsets[i2][1]];
+            [fr, fc] = [tr + kOffsets[i3][0], tc + kOffsets[i3][1]];
+            if (!inBounds(ekr, ekc) || !inBounds(eqr, eqc) || !inBounds(fr, fc)) continue;
+            b[ekr][ekc] = E('k');
+            b[eqr][eqc] = rng() > 0.4 ? E('q') : E('r');
+            b[fr][fc] = P('n');
+            const kr = turn === 'w' ? 7 : 0;
+            const kc = (ekc < 4) ? 6 : 1;
+            if (b[kr][kc] || (Math.abs(kr - ekr) <= 1 && Math.abs(kc - ekc) <= 1)) continue;
+            b[kr][kc] = P('k');
+            title = "動態幾何騎士雙擊 (Dynamic Knight Fork)";
+            category = "基礎捉雙";
+            desc = "觀察敵方國王與大子的幾何落點，跳動騎士踏入雙擊焦點格，同時將軍並鎖定大子！";
+            knowledge = "騎士八方捉雙：只要兩顆敵子落在同色且距離合適的格子上，騎士就能踏入交叉點發動致命捉雙！";
+          } else {
+            const ekr = turn === 'w' ? Math.floor(rng() * 2) : 6 + Math.floor(rng() * 2);
+            const ekc = 1 + Math.floor(rng() * 6);
+            tr = turn === 'w' ? ekr + 2 + Math.floor(rng() * 2) : ekr - 2 - Math.floor(rng() * 2);
+            tc = ekc;
+            const rc = (ekc + 3 + Math.floor(rng() * 3)) % 8;
+            if (rc === tc) continue;
+            const rr = tr;
+            fr = tr + (turn === 'w' ? 1 : -1);
+            fc = tc > 0 ? tc - 1 : tc + 1;
+            if (!inBounds(tr, tc) || !inBounds(fr, fc)) continue;
+            b[ekr][ekc] = E('k');
+            b[rr][rc] = E('r');
+            b[fr][fc] = P('q');
+            const kr = turn === 'w' ? 7 : 0;
+            const kc = (tc + 3) % 8;
+            if (b[kr][kc]) continue;
+            b[kr][kc] = P('k');
+            title = "皇后縱橫雙重打擊 (Dynamic Queen Fork)";
+            category = "基礎捉雙";
+            desc = "敵方重車落單無援。調動皇后切入中樞位置，縱向將軍敵王、橫向鎖定敵車！";
+            knowledge = "皇后十字雙擊：利用皇后兼具直線與橫排的射程，一子雙責同時將軍與掠奪落單重車！";
+          }
+        } else if (theme === 'skewer') {
+          if (rng() > 0.45) {
+            const col = 1 + Math.floor(rng() * 6);
+            const ekr = 2 + Math.floor(rng() * 3);
+            const eqr = turn === 'w' ? 0 : 7;
+            if (ekr === eqr) continue;
+            fr = turn === 'w' ? 7 : 0;
+            fc = (col + 2 + Math.floor(rng() * 4)) % 8;
+            tr = fr;
+            tc = col;
+            b[ekr][col] = E('k');
+            b[eqr][col] = rng() > 0.4 ? E('q') : E('r');
+            b[fr][fc] = P('r');
+            const kc = (col + 5) % 8;
+            const kr = turn === 'w' ? 6 : 1;
+            if (kc === fc || kc === tc) continue;
+            b[kr][kc] = P('k');
+            title = "開放直線重車串擊 (Dynamic Rook Skewer)";
+            category = "串擊與牽制";
+            desc = "敵王與後方大子排在同一條開放直線。橫移重車直接將軍敵王，穿透收割後方大子！";
+            knowledge = "直線串擊（File Skewer）：重車搶佔開放線將軍敵王，敵王被迫退避後即可吃掉後方大子！";
+          } else {
+            const dCol = rng() > 0.5 ? 1 : -1;
+            const startC = dCol === 1 ? 1 + Math.floor(rng() * 2) : 5 + Math.floor(rng() * 2);
+            const startR = turn === 'w' ? 5 : 2;
+            tr = startR;
+            tc = startC;
+            const ekr = tr + (turn === 'w' ? -2 : 2);
+            const ekc = tc + 2 * dCol;
+            const eqr = tr + (turn === 'w' ? -4 : 4);
+            const eqc = tc + 4 * dCol;
+            fr = tr + (turn === 'w' ? 1 : -1);
+            fc = tc + dCol;
+            if (!inBounds(ekr, ekc) || !inBounds(eqr, eqc) || !inBounds(fr, fc)) continue;
+            b[ekr][ekc] = E('k');
+            b[eqr][eqc] = E('r');
+            b[fr][fc] = P('b');
+            const kr = turn === 'w' ? 7 : 0;
+            const kc = dCol === 1 ? 6 : 1;
+            if (b[kr][kc]) continue;
+            b[kr][kc] = P('k');
+            title = "長斜線主教精準串擊 (Dynamic Bishop Skewer)";
+            category = "串擊與牽制";
+            desc = "敵王與重車站在同一條大斜線上。出動主教斜向將軍，迫使敵王讓出後方重車！";
+            knowledge = "斜線串擊（Diagonal Skewer）：主教是長斜線的主宰，相隔數格也能一箭雙鵰！";
+          }
+        } else if (theme === 'mate1' || theme === 'classic') {
+          if (attempt % 2 === 0) {
+            const ekc = 1 + Math.floor(rng() * 6);
+            const ekr = turn === 'w' ? 0 : 7;
+            const kr = turn === 'w' ? 2 : 5;
+            const kc = ekc;
+            tr = turn === 'w' ? 1 : 6;
+            tc = ekc;
+            fr = tr;
+            fc = (ekc + 3 + Math.floor(rng() * 3)) % 8;
+            if (Math.abs(fc - ekc) <= 1) continue;
+            b[ekr][ekc] = E('k');
+            b[kr][kc] = P('k');
+            b[fr][fc] = P('q');
+            isMateIn1 = true;
+            title = "王后協力死亡之吻絕殺 (Kiss of Death Mate)";
+            category = theme === 'classic' ? "經典殺局" : "入門一步殺";
+            catClass = "cat-easy";
+            rating = "入門 ★☆☆☆☆";
+            desc = "己方國王已與敵王正面對峙（Opposition）。橫移皇后到敵王正前方完成貼臉將死！";
+            knowledge = "死亡之吻（Kiss of Death）：在國王或同伴保護下，皇后貼到敵王正前方一格，封死全部退路一擊必殺！";
+          } else {
+            const ekc = 1 + Math.floor(rng() * 6);
+            const ekr = turn === 'w' ? 0 : 7;
+            const pr = turn === 'w' ? 1 : 6;
+            if (ekc - 1 < 0 || ekc + 1 >= 8) continue;
+            b[ekr][ekc] = E('k');
+            b[pr][ekc - 1] = E('p');
+            b[pr][ekc] = E('p');
+            b[pr][ekc + 1] = E('p');
+            const rc = (ekc + 3 + Math.floor(rng() * 3)) % 8;
+            if (Math.abs(rc - ekc) <= 1) continue;
+            fr = turn === 'w' ? 6 : 1;
+            fc = rc;
+            tr = ekr;
+            tc = rc;
+            b[fr][fc] = P('r');
+            const kr = turn === 'w' ? 7 : 0;
+            const kc = ekc;
+            b[kr][kc] = P('k');
+            isMateIn1 = true;
+            title = "開放線重車底線絕殺 (Dynamic Back-Rank Mate)";
+            category = theme === 'classic' ? "經典殺局" : "入門一步殺";
+            catClass = "cat-easy";
+            rating = "入門 ★☆☆☆☆";
+            desc = "敵王被自己的三隻小兵困在底線沒有換氣格。重車直衝底線一擊將死！";
+            knowledge = "底線殺（Back-Rank Mate）：當敵王前方的三隻小兵未推進時，底線一旦失守即刻斃命！";
+          }
+        } else {
+          const tcCand = 1 + Math.floor(rng() * 6);
+          const trCand = 2 + Math.floor(rng() * 4);
+          tr = trCand;
+          tc = tcCand;
+          const kOffsets = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+          const [dr, dc] = kOffsets[Math.floor(rng() * 8)];
+          fr = tr + dr;
+          fc = tc + dc;
+          if (!inBounds(fr, fc)) continue;
+          const ekr = turn === 'w' ? 0 : 7;
+          const ekc = (tc + 3) % 8;
+          if (Math.abs(ekr - tr) <= 1 && Math.abs(ekc - tc) <= 1) continue;
+          if (Math.abs(ekr - fr) <= 1 && Math.abs(ekc - fc) <= 1) continue;
+          const kr = turn === 'w' ? 7 : 0;
+          const kc = (ekc + 2) % 8;
+          if (kr === fr && kc === fc) continue;
+          b[ekr][ekc] = E('k');
+          b[kr][kc] = P('k');
+          b[tr][tc] = E('q');
+          b[fr][fc] = P('n');
+          title = "精準獵殺無根落單皇后 (Snatching Hanging Queen)";
+          category = "困子與消除";
+          catClass = "cat-easy";
+          rating = "基礎 ★★☆☆☆";
+          desc = "敵方皇后孤軍深入且沒有任何子力保護！跳動騎士直接將其擒獲！";
+          knowledge = "獵殺無根子（Undefended Piece）：實戰中隨時檢查敵方大子是否處於我方騎士射程內！";
+        }
+
+        if (verifyTacticalBoard(b, fr, fc, tr, tc, turn, isMateIn1)) {
+          return { board: b, fr, fc, tr, tc, turn, isMateIn1, title, category, themeKey: theme, catClass, rating, desc, knowledge };
+        }
+      }
+      return null;
+    }
+
     function getPuzzle(id) {
       const rng = mulberry32(id * 104729 + 17);
-      // Coprime stride (7 and 24 coprime) so consecutive 24 IDs cycle all 24 distinct master motifs!
-      const tplIdx = ((id - 1) * 7) % PUZZLE_DATA.length;
-      const tpl = PUZZLE_DATA[tplIdx];
 
-      const board = fenToBoard(tpl.fen);
-      let [fr, fc] = tpl.from;
-      let [tr, tc] = tpl.to;
-
-      // Add safe background filler pawns to make each board visually rich and unique
-      const safeCols = [0, 1, 7].filter(c => c !== fc && c !== tc && !board[6][c] && !board[1][c]);
-      for (const c of safeCols) {
-        if (rng() > 0.6 && !board[6][c] && !board[7][c] && !board[5][c]) {
-          board[6][c] = 'P';
-        }
-        if (rng() > 0.6 && !board[1][c] && !board[0][c] && !board[2][c]) {
-          board[1][c] = 'p';
+      // Interleave 40 Master Templates with 64-Square Procedural Tactical Synthesis after ID 40
+      let board, fr, fc, tr, tc, turn, tpl;
+      if (id > 40 && id % 2 === 0) {
+        const proc = generateProceduralTactic(id, rng);
+        if (proc) {
+          board = proc.board;
+          fr = proc.fr; fc = proc.fc; tr = proc.tr; tc = proc.tc;
+          turn = proc.turn;
+          tpl = proc;
         }
       }
 
+      if (!tpl) {
+        // Coprime stride 11 with 40 templates -> every 40 consecutive IDs visit all 40 master motifs
+        const tplIdx = ((id - 1) * 11) % PUZZLE_DATA.length;
+        const cycle = Math.floor((id - 1) / PUZZLE_DATA.length);
+        tpl = PUZZLE_DATA[tplIdx];
+
+        board = fenToBoard(tpl.fen);
+        [fr, fc] = tpl.from;
+        [tr, tc] = tpl.to;
+        turn = tpl.turn;
+
+        // 1. Horizontal Mirroring (c <-> 7 - c)
+        const doMirrorH = ((cycle + tplIdx) % 2 === 1) || (id > 40 && rng() > 0.5);
+        if (doMirrorH) {
+          const mirrored = emptyBoard();
+          for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+              mirrored[r][7 - c] = board[r][c];
+            }
+          }
+          if (verifyTacticalBoard(mirrored, fr, 7 - fc, tr, 7 - tc, turn, tpl.isMateIn1)) {
+            board = mirrored;
+            fc = 7 - fc;
+            tc = 7 - tc;
+          }
+        }
+
+        // 2. Color & Vertical Inversion (r <-> 7 - r and swap case) for Black counterattack variety
+        const doInvertColor = (id % 4 === 0) || (cycle % 3 === 1 && id % 2 === 0);
+        if (doInvertColor) {
+          const inverted = emptyBoard();
+          for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+              inverted[7 - r][c] = swapCase(board[r][c]);
+            }
+          }
+          const nTurn = turn === 'w' ? 'b' : 'w';
+          if (verifyTacticalBoard(inverted, 7 - fr, fc, 7 - tr, tc, nTurn, tpl.isMateIn1)) {
+            board = inverted;
+            fr = 7 - fr;
+            tr = 7 - tr;
+            turn = nTurn;
+          }
+        }
+
+        // 3. 2D Translation Shift (dr, dc) when valid
+        if (cycle > 0 || id > 20) {
+          const canShiftRow = board[fr][fc].toLowerCase() !== 'p';
+          const shifts = [
+            [0, -1], [0, 1], [0, -2], [0, 2],
+            ...(canShiftRow ? [[-1, 0], [1, 0], [-1, -1], [-1, 1], [1, -1], [1, 1]] : [])
+          ];
+          const startShiftIdx = (cycle * 3 + tplIdx) % shifts.length;
+          for (let s = 0; s < shifts.length; s++) {
+            if ((cycle + s) % 3 === 0) continue;
+            const [dr, dc] = shifts[(startShiftIdx + s) % shifts.length];
+            const shifted = tryShiftBoard(board, fr, fc, tr, tc, dr, dc, turn, tpl.isMateIn1);
+            if (shifted) {
+              board = shifted.board;
+              fr = shifted.fr;
+              fc = shifted.fc;
+              tr = shifted.tr;
+              tc = shifted.tc;
+              break;
+            }
+          }
+        }
+      }
+
+      // 4. Safe Dynamic Background Pawns (verified via verifyTacticalBoard so they never break solution!)
+      const candidateCols = [0, 1, 2, 5, 6, 7];
+      for (const c of candidateCols) {
+        if (c === fc || c === tc) continue;
+        const wRow = rng() > 0.5 ? 6 : 5;
+        if (rng() > 0.55 && !board[wRow][c] && !board[wRow - 1][c]) {
+          board[wRow][c] = 'P';
+          if (!verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1)) {
+            board[wRow][c] = '';
+          }
+        }
+        const bRow = rng() > 0.5 ? 1 : 2;
+        if (rng() > 0.55 && !board[bRow][c] && !board[bRow + 1][c]) {
+          board[bRow][c] = 'p';
+          if (!verifyTacticalBoard(board, fr, fc, tr, tc, turn, tpl.isMateIn1)) {
+            board[bRow][c] = '';
+          }
+        }
+      }
+
+      const movingPiece = board[fr][fc];
+      const targetPiece = board[tr][tc];
+      const moverName = PIECE_NAMES_ZH[movingPiece] || '棋子';
+      const startSq = sqName(fr, fc);
+      const endSq = sqName(tr, tc);
+      const actionText = targetPiece
+        ? `吃掉 ${endSq} 的${PIECE_NAMES_ZH[targetPiece]}`
+        : `移動到 ${endSq}`;
+      const goalText = tpl.isMateIn1
+        ? `一舉將死${turn === 'w' ? '黑王' : '白王'}！`
+        : `完成「${tpl.category}」戰術打擊！`;
+
+      const dynamicHint = `點選 ${startSq} 的${moverName}，${actionText}，${goalText}`;
+      const turnPrefix = turn === 'b' ? '【黑方反擊】' : '';
+
       return {
         id,
-        title: `第 ${id} 題：${tpl.title.replace(/^第 \d+ 題：/, '').replace(/^\d+ /, '')}`,
-        category: tpl.category,
+        title: `第 ${id} 題：${turnPrefix}${tpl.title}`,
+        category: turn === 'b' && tpl.themeKey !== 'classic' ? '黑先反擊戰術' : tpl.category,
         themeKey: tpl.themeKey,
         catClass: tpl.catClass,
         rating: tpl.rating,
-        turn: tpl.turn,
+        turn,
         isMateIn1: tpl.isMateIn1,
-        desc: tpl.desc,
+        desc: `${turn === 'b' ? '輪到黑方走棋反擊！' : ''}${tpl.desc}`,
         knowledge: tpl.knowledge,
         initialBoard: board,
         solution: { from: [fr, fc], to: [tr, tc] },
-        hint: tpl.hint
+        hint: dynamicHint
       };
     }
 
@@ -1497,6 +1946,7 @@
     let puzzleSolved = false;
     let showTargetHint = false;
     let lastMoveSquares = null;
+    let autoNextTimer = null;
 
     let solvedSet = new Set();
     let totalSolvedCount = 0;
@@ -1532,6 +1982,10 @@
     }
 
     function loadPuzzle(id) {
+      if (autoNextTimer) {
+        clearTimeout(autoNextTimer);
+        autoNextTimer = null;
+      }
       currentPuzzleId = Math.max(1, Math.min(10000, id));
       currentPuzzle = getPuzzle(currentPuzzleId);
       currentBoard = JSON.parse(JSON.stringify(currentPuzzle.initialBoard));
@@ -1718,7 +2172,8 @@
 
         const autoNext = document.getElementById('auto-next-toggle');
         if (autoNext && autoNext.checked) {
-          setTimeout(() => {
+          if (autoNextTimer) clearTimeout(autoNextTimer);
+          autoNextTimer = setTimeout(() => {
             if (puzzleSolved) nextTactic();
           }, 1100);
         }
@@ -1858,6 +2313,12 @@
       const bestEl = document.getElementById('coord-best');
       if (bestEl) bestEl.innerText = coordBest;
 
+      if (!currentTargetCoord) {
+        currentTargetCoord = generateRandomCoord();
+        const targetEl = document.getElementById('target-coord');
+        if (targetEl) targetEl.innerText = currentTargetCoord;
+      }
+
       const files = coordIsWhiteBottom ? FILES : [...FILES].reverse();
       const ranks = coordIsWhiteBottom ? RANKS : [...RANKS].reverse();
 
@@ -1895,7 +2356,7 @@
       return randomFile + randomRank;
     }
 
-    function startCoordGame() {
+    function startCoordGame(keepCurrentTarget = false) {
       if (coordTimer) clearInterval(coordTimer);
       coordTimeLeft = 30;
       coordScore = 0;
@@ -1906,7 +2367,9 @@
       document.getElementById('btn-start-coord').innerText = '🔄 重新開始';
       document.getElementById('coord-feedback-msg').innerText = '請在棋盤上點擊上方顯示的座標！';
 
-      pickNextTargetCoord();
+      if (!keepCurrentTarget || !currentTargetCoord || currentTargetCoord === '完成!') {
+        pickNextTargetCoord();
+      }
 
       coordTimer = setInterval(() => {
         coordTimeLeft--;
@@ -1937,7 +2400,9 @@
     }
 
     function onCoordSquareClick(coord, sqEl) {
-      if (!isCoordPlaying) return;
+      if (!isCoordPlaying) {
+        startCoordGame(true);
+      }
       if (coord === currentTargetCoord) {
         coordScore++;
         playBeep('success');
@@ -1964,51 +2429,17 @@
 
 
     // ==========================================
-    // 3. KNIGHT PATH GAME (UNLIMITED LEVELS)
+    // 3. KNIGHT PATH GAME (UNLIMITED LEVELS + OBSTACLES)
     // ==========================================
     let knightPos = [7, 1];
     let targetStars = [];
+    let knightObstacles = [];
     let knightSteps = 0;
+    let knightParSteps = 3;
     let knightLevel = 1;
+    let knightNextTimer = null;
 
-    function generateKnightLevel(lvl) {
-      const rng = mulberry32(lvl * 2029 + 17);
-      const start = [Math.floor(rng() * 8), Math.floor(rng() * 8)];
-      const starCount = Math.min(6, 2 + Math.floor((lvl + 1) / 2));
-      const stars = [];
-      let cur = [...start];
-      for (let i = 0; i < starCount; i++) {
-        // Walk 2 or 3 random knight jumps from cur to place reachable stars
-        const jumps = 1 + (i % 2);
-        for (let j = 0; j < jumps; j++) {
-          const moves = getKnightMoves(cur[0], cur[1]);
-          cur = moves[Math.floor(rng() * moves.length)];
-        }
-        if ((cur[0] !== start[0] || cur[1] !== start[1]) &&
-            !stars.some(s => s[0] === cur[0] && s[1] === cur[1])) {
-          stars.push([...cur]);
-        }
-      }
-      if (stars.length === 0) stars.push([3, 3]);
-      return { start, stars };
-    }
-
-    function initKnightGame() {
-      const cfg = generateKnightLevel(knightLevel);
-      knightPos = [...cfg.start];
-      targetStars = cfg.stars.map(s => [...s]);
-      knightSteps = 0;
-      updateKnightUI();
-      renderKnightBoard();
-    }
-
-    function updateKnightUI() {
-      document.getElementById('knight-step-count').innerText = `步數: ${knightSteps}`;
-      document.getElementById('knight-stars-left').innerText = `${targetStars.length} ⭐`;
-      document.getElementById('knight-level').innerText = `第 ${knightLevel} 關（無限關卡）`;
-    }
-
-    function getKnightMoves(r, c) {
+    function getRawKnightMoves(r, c) {
       const offsets = [
         [-2, -1], [-2, 1], [-1, -2], [-1, 2],
         [1, -2], [1, 2], [2, -1], [2, 1]
@@ -2016,6 +2447,81 @@
       return offsets
         .map(([dr, dc]) => [r + dr, c + dc])
         .filter(([nr, nc]) => nr >= 0 && nr < 8 && nc >= 0 && nc < 8);
+    }
+
+    function generateKnightLevel(lvl) {
+      const rng = mulberry32(lvl * 2029 + 17);
+      const start = [Math.floor(rng() * 8), Math.floor(rng() * 8)];
+      const starCount = Math.min(6, 2 + Math.floor((lvl + 1) / 2));
+      const stars = [];
+      const safePathSet = new Set([`${start[0]},${start[1]}`]);
+      let cur = [...start];
+      let totalPar = 0;
+
+      for (let i = 0; i < starCount; i++) {
+        const jumps = (lvl === 1) ? 1 : (1 + ((lvl + i) % 2));
+        for (let j = 0; j < jumps; j++) {
+          const moves = getRawKnightMoves(cur[0], cur[1]);
+          cur = moves[Math.floor(rng() * moves.length)];
+          safePathSet.add(`${cur[0]},${cur[1]}`);
+          totalPar++;
+        }
+        if ((cur[0] !== start[0] || cur[1] !== start[1]) &&
+            !stars.some(s => s[0] === cur[0] && s[1] === cur[1])) {
+          stars.push([...cur]);
+        }
+      }
+
+      if (stars.length === 0) {
+        const fallback = getRawKnightMoves(start[0], start[1])[0];
+        stars.push([...fallback]);
+        safePathSet.add(`${fallback[0]},${fallback[1]}`);
+        totalPar = 1;
+      }
+
+      // Add guaranteed-solvable obstacles starting from Level 2 (never placed on safePathSet!)
+      const obstacles = [];
+      if (lvl >= 2) {
+        const obsCount = Math.min(12, 2 + Math.floor(lvl * 1.2));
+        for (let k = 0; k < obsCount * 3 && obstacles.length < obsCount; k++) {
+          const or = Math.floor(rng() * 8);
+          const oc = Math.floor(rng() * 8);
+          const key = `${or},${oc}`;
+          if (!safePathSet.has(key) && !obstacles.some(o => o[0] === or && o[1] === oc)) {
+            obstacles.push([or, oc]);
+          }
+        }
+      }
+
+      return { start, stars, obstacles, par: Math.max(stars.length, totalPar) };
+    }
+
+    function initKnightGame() {
+      if (knightNextTimer) {
+        clearTimeout(knightNextTimer);
+        knightNextTimer = null;
+      }
+      const cfg = generateKnightLevel(knightLevel);
+      knightPos = [...cfg.start];
+      targetStars = cfg.stars.map(s => [...s]);
+      knightObstacles = cfg.obstacles.map(o => [...o]);
+      knightSteps = 0;
+      knightParSteps = cfg.par;
+      updateKnightUI();
+      renderKnightBoard();
+    }
+
+    function updateKnightUI() {
+      document.getElementById('knight-step-count').innerText = `步數: ${knightSteps} / 標準: ${knightParSteps}`;
+      document.getElementById('knight-stars-left').innerText = `${targetStars.length} ⭐`;
+      const obsText = knightObstacles.length > 0 ? `（含 ${knightObstacles.length} 處禁區 ⛔）` : '（新手熱身無障礙）';
+      document.getElementById('knight-level').innerText = `第 ${knightLevel} 關 ${obsText}`;
+    }
+
+    function getKnightMoves(r, c) {
+      return getRawKnightMoves(r, c).filter(
+        ([nr, nc]) => !knightObstacles.some(o => o[0] === nr && o[1] === nc)
+      );
     }
 
     function renderKnightBoard() {
@@ -2032,6 +2538,7 @@
 
           const isKnightHere = knightPos[0] === r && knightPos[1] === c;
           const starIdx = targetStars.findIndex(s => s[0] === r && s[1] === c);
+          const isObstacle = knightObstacles.some(o => o[0] === r && o[1] === c);
           const isValidTarget = validMoves.some(m => m[0] === r && m[1] === c);
 
           if (isKnightHere) {
@@ -2045,9 +2552,16 @@
             star.textContent = '⭐';
             star.style.fontSize = '24px';
             sq.appendChild(star);
+          } else if (isObstacle) {
+            sq.style.background = 'rgba(239, 68, 68, 0.35)';
+            const obs = document.createElement('span');
+            obs.textContent = '⛔';
+            obs.style.fontSize = '20px';
+            obs.style.opacity = '0.88';
+            sq.appendChild(obs);
           }
 
-          if (isValidTarget) {
+          if (isValidTarget && targetStars.length > 0) {
             sq.classList.add(starIdx !== -1 ? 'sq-legal-capture' : 'sq-legal');
             sq.addEventListener('click', () => moveKnight(r, c));
           }
@@ -2065,12 +2579,19 @@
       if (starIdx !== -1) {
         targetStars.splice(starIdx, 1);
         playBeep('success');
+      } else {
+        playBeep('move');
       }
 
       updateKnightUI();
 
       if (targetStars.length === 0) {
-        document.getElementById('knight-msg').innerHTML = `🎉 <strong>第 ${knightLevel} 關完成！</strong> 共耗費 ${knightSteps} 步吃完所有星星！`;
+        const perf = knightSteps <= knightParSteps ? '🏆 完美神算步數！' : '✨ 成功過關！';
+        document.getElementById('knight-msg').innerHTML = `🎉 <strong>第 ${knightLevel} 關完成！</strong> ${perf}（耗費 ${knightSteps} 步）即將進入下一關...`;
+        if (knightNextTimer) clearTimeout(knightNextTimer);
+        knightNextTimer = setTimeout(() => {
+          nextKnightLevel();
+        }, 1050);
       } else {
         document.getElementById('knight-msg').innerText = `繼續前進！還剩 ${targetStars.length} 顆星！`;
       }
@@ -2080,7 +2601,7 @@
 
     function resetKnightGame() {
       initKnightGame();
-      document.getElementById('knight-msg').innerText = '本關已重置，請重新出發！';
+      document.getElementById('knight-msg').innerText = '本關已重置，請避開 ⛔ 禁區重新出發！';
     }
 
     function nextKnightLevel() {
@@ -2090,7 +2611,7 @@
     }
 
     // ==========================================
-    // 4. PAWN WARS GAME ENGINE (人機對決)
+    // 4. PAWN WARS GAME ENGINE (8+ BATTLE FORMATIONS & AI)
     // ==========================================
     let pwBoard = null;
     let pwSelectedSq = null;
@@ -2098,6 +2619,81 @@
     let pwTurn = 'w';
     let pwDifficulty = 'easy';
     let pwGameOver = false;
+    let pwStage = 1;
+    let pwTimerId = null;
+
+    const PAWN_WARS_FORMATIONS = [
+      {
+        title: "第 1 陣：經典八兵會戰 (Standard 8v8)",
+        desc: "雙方滿編 8 兵標準對決！考驗整體兵鏈推進、交換時機與製造通行兵的基本功！",
+        setup: (b) => {
+          for (let c = 0; c < 8; c++) { b[1][c] = 'p'; b[6][c] = 'P'; }
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      },
+      {
+        title: "第 2 陣：中路四兵交鋒 (Central 4v4 Clash)",
+        desc: "聚焦中央 c, d, e, f 四條直線的短兵相接！誰能率先在中央撕開缺口就能升變獲勝！",
+        setup: (b) => {
+          for (const c of [2, 3, 4, 5]) { b[2][c] = 'p'; b[5][c] = 'P'; }
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      },
+      {
+        title: "第 3 陣：雙翼分兵包抄 (Flank Pincer 6v6)",
+        desc: "中央空曠、左右兩翼各三兵對峙！善用「調虎離山」在一翼牽制、另一翼突破！",
+        setup: (b) => {
+          for (const c of [0, 1, 2, 5, 6, 7]) { b[1][c] = 'p'; b[6][c] = 'P'; }
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      },
+      {
+        title: "第 4 陣：世界名局三兵突破 (3v3 Breakthrough)",
+        desc: "殘局最著名的三兵對三兵！提示：挺進中央兵棄兵引開對手，即可製造不可阻擋的通行兵！",
+        setup: (b) => {
+          for (const c of [0, 1, 2]) { b[1][c] = 'p'; b[3][c] = 'P'; }
+          for (const c of [5, 6]) { b[2][c] = 'p'; b[6][c] = 'P'; }
+          b[0][6] = 'k'; b[7][6] = 'K';
+        }
+      },
+      {
+        title: "第 5 陣：交錯兵鏈攻防戰 (Pawn Chain Warfare)",
+        desc: "中央兵鏈已經鎖死，勝負關鍵在於從側翼發動「裂兵（Pawn Break）」瓦解敵方兵鏈基底！",
+        setup: (b) => {
+          b[3][3] = 'p'; b[2][2] = 'p'; b[1][1] = 'p'; b[1][5] = 'p'; b[1][6] = 'p';
+          b[4][3] = 'P'; b[5][4] = 'P'; b[6][5] = 'P'; b[6][1] = 'P'; b[6][2] = 'P';
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      },
+      {
+        title: "第 6 陣：前鋒深入奇襲陣 (Vanguard Spearhead)",
+        desc: "白方兩名先鋒小兵已深入敵陣！全力掩護前鋒小兵突破黑方封鎖線！",
+        setup: (b) => {
+          for (const c of [1, 2, 4, 5, 6]) b[1][c] = 'p';
+          b[3][3] = 'P'; b[3][4] = 'P';
+          b[6][1] = 'P'; b[6][2] = 'P'; b[6][6] = 'P';
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      },
+      {
+        title: "第 7 陣：國王御駕親征 (Royal Central Escort)",
+        desc: "殘局之王親臨前線！雙方國王已推進至棋盤中央，利用「王之對峙」掩護小兵升變！",
+        setup: (b) => {
+          for (const c of [1, 3, 4, 6]) { b[2][c] = 'p'; b[5][c] = 'P'; }
+          b[2][4] = 'k'; b[1][4] = 'p';
+          b[5][4] = 'K'; b[6][4] = 'P';
+        }
+      },
+      {
+        title: "第 8 陣：連兵對抗孤兵陣 (Connected vs Isolated)",
+        desc: "白方擁有緊密相連的中央鐵壁連兵，對抗黑方分散的孤立兵群，體會兵形結構的威力！",
+        setup: (b) => {
+          for (const c of [0, 2, 4, 6, 7]) b[1][c] = 'p';
+          for (const c of [2, 3, 4, 5, 6]) b[6][c] = 'P';
+          b[0][4] = 'k'; b[7][4] = 'K';
+        }
+      }
+    ];
 
     function setPawnWarsDifficulty(level) {
       pwDifficulty = level;
@@ -2121,6 +2717,11 @@
       initPawnWars();
     }
 
+    function nextPawnWarsStage() {
+      pwStage++;
+      initPawnWars();
+    }
+
     function countPawns(board) {
       let w = 0, b = 0;
       for (let r = 0; r < 8; r++) {
@@ -2134,13 +2735,39 @@
     }
 
     function initPawnWars() {
-      pwBoard = emptyBoard();
-      for (let c = 0; c < 8; c++) {
-        pwBoard[1][c] = 'p';
-        pwBoard[6][c] = 'P';
+      if (pwTimerId) {
+        clearTimeout(pwTimerId);
+        pwTimerId = null;
       }
-      pwBoard[0][4] = 'k';
-      pwBoard[7][4] = 'K';
+      pwBoard = emptyBoard();
+
+      const stageBadge = document.getElementById('pawnwars-stage-badge');
+      const stageTitle = document.getElementById('pawnwars-stage-title');
+      const stageDesc = document.getElementById('pawnwars-stage-desc');
+
+      if (pwStage <= PAWN_WARS_FORMATIONS.length) {
+        const fmt = PAWN_WARS_FORMATIONS[pwStage - 1];
+        fmt.setup(pwBoard);
+        if (stageBadge) stageBadge.textContent = `第 ${pwStage} 陣`;
+        if (stageTitle) stageTitle.textContent = fmt.title;
+        if (stageDesc) stageDesc.textContent = fmt.desc;
+      } else {
+        // Procedural dynamic formation for stage 9+
+        const rng = mulberry32(pwStage * 4099 + 29);
+        const cols = [0, 1, 2, 3, 4, 5, 6, 7].filter(() => rng() > 0.3);
+        if (cols.length < 3) cols.push(2, 3, 4, 5);
+        for (const c of cols) {
+          const bRow = rng() > 0.7 ? 2 : 1;
+          const wRow = rng() > 0.7 ? 5 : 6;
+          pwBoard[bRow][c] = 'p';
+          pwBoard[wRow][c] = 'P';
+        }
+        pwBoard[0][4] = 'k';
+        pwBoard[7][4] = 'K';
+        if (stageBadge) stageBadge.textContent = `第 ${pwStage} 陣`;
+        if (stageTitle) stageTitle.textContent = `第 ${pwStage} 陣：隨機精銳殘局陣 (Dynamic Formation #${pwStage})`;
+        if (stageDesc) stageDesc.textContent = `由演算法動態生成的第 ${pwStage} 號獨特兵陣（共 ${cols.length} 兵對決），考驗臨場應變能力！`;
+      }
 
       pwSelectedSq = null;
       pwLegalMoves = [];
@@ -2167,7 +2794,7 @@
           }
           if (msgBox) {
             msgBox.className = 'feedback-box success';
-            msgBox.innerHTML = `🎉 <strong>恭喜獲勝！</strong> ${statusMsg || '小兵成功突破升變或殲滅敵方！'}`;
+            msgBox.innerHTML = `🎉 <strong>恭喜攻克第 ${pwStage} 陣！</strong> ${statusMsg || '小兵成功突破升變或殲滅敵方！'} 可點擊「下一關兵陣 ➡️」繼續挑戰！`;
             msgBox.style.display = 'block';
           }
         } else if (isWin === false) {
@@ -2177,7 +2804,7 @@
           }
           if (msgBox) {
             msgBox.className = 'feedback-box error';
-            msgBox.innerHTML = `💀 <strong>遺憾落敗！</strong> ${statusMsg || '電腦小兵突破了防線。再開一局挑戰吧！'}`;
+            msgBox.innerHTML = `💀 <strong>遺憾落敗！</strong> ${statusMsg || '電腦小兵突破了防線。點擊「🔄 重置本陣」再戰一局！'}`;
             msgBox.style.display = 'block';
           }
         } else {
@@ -2203,7 +2830,7 @@
         }
         if (msgBox && !statusMsg) {
           msgBox.className = 'feedback-box success';
-          msgBox.innerHTML = '🎯 點選白兵向前推進一格（起始步可走兩格）或斜向吃黑兵！先升變為后或吃光對方兵者獲勝！';
+          msgBox.innerHTML = `🎯 <strong>第 ${pwStage} 陣交鋒中：</strong>點選白兵或白王移動，先升變為后或吃光對方小兵者獲勝！`;
           msgBox.style.display = 'block';
         }
       }
@@ -2335,9 +2962,10 @@
           pwTurn = 'b';
           updatePawnWarsUI();
 
-          setTimeout(() => {
+          if (pwTimerId) clearTimeout(pwTimerId);
+          pwTimerId = setTimeout(() => {
             makePawnWarsAIMove();
-          }, 350);
+          }, 320);
         } else {
           pwSelectedSq = null;
           pwLegalMoves = [];
@@ -2382,7 +3010,7 @@
             const kPos = findKing(board, 'b');
             if (kPos) {
               const dist = Math.abs(kPos[0] - r) + Math.abs(kPos[1] - c);
-              score += (14 - dist) * 2;
+              score -= (14 - dist) * 2;
             }
           } else if (p === 'q') {
             score -= 5000;
