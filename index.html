@@ -1762,28 +1762,29 @@
         title: "皇后中心四向大捉雙 (Central Queen Fork)",
         category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵方重車落單無保護。將皇后推入中路，同時將軍敵王並鎖定角落落單重車！",
-        knowledge: "皇后捉雙（Queen Fork）：利用皇后米字形八方射程，在將軍的同時掠奪敵方無根大子！",
-        fen: "r3k3/ppp2ppp/8/8/8/1Q6/PPP2PPP/4K2R",
-        from: [5, 1], to: [5, 4]
+        desc: "敵方重車落單無保護。將皇后推入中路 e4，縱向將軍敵王、斜向鎖定角落落單重車！",
+        knowledge: "皇后捉雙（Queen Fork）：利用皇后米字形八方射程，在將軍敵王的同時斜向掠奪角落無根重車！",
+        fen: "r3k3/p1p2ppp/8/8/8/3Q4/PPP2PPP/5RK1",
+        from: [5, 3], to: [4, 4]
       },
       {
         title: "主教對角線雙向捉雙 (Bishop Diagonal Fork)",
         category: "基礎捉雙", themeKey: "fork", catClass: "cat-med", rating: "基礎 ★★☆☆☆",
         turn: "w", isMateIn1: false,
-        desc: "敵方兩隻重車分列底線兩翼。出動主教挺進中心大斜線交叉點，雙向鎖定兩隻落單重車！",
-        knowledge: "主教捉雙（Bishop Fork）：主教佔據中心大斜線交叉點時，能沿兩條對角線同時攻擊敵方兩隻落單大子！",
-        fen: "r3k1r1/ppp2ppp/8/8/8/1B6/PPP2PPP/5RK1",
+        desc: "敵方兩隻重車分列底線兩翼。出動主教挺進中心大斜線交叉點 d5，雙向鎖定兩隻落單重車！",
+        knowledge: "主教捉雙（Bishop Fork）：主教佔據中心交叉樞紐 d5 時，兩條開放大斜線同時鎖定 a8 與 g8 兩顆落單重車！",
+        fen: "r3k1r1/p1p3pp/8/8/8/1B6/PPP2PPP/5RK1",
         from: [5, 1], to: [3, 3]
       },
       {
         title: "抽將閃擊掠奪皇后 (Discovered Check)",
         category: "抽將與閃擊", themeKey: "fork", catClass: "cat-hard", rating: "進階 ★★★☆☆",
         turn: "w", isMateIn1: false,
-        desc: "車與馬排在同一直線瞄準敵王。跳開騎士發動閃擊抽將，同時踏入敵后攻擊範圍！",
-        knowledge: "抽將（Discovered Check）：前子移開亮出後方重子將軍，對手忙於救王，前子即可無償吃掉敵后！",
+        desc: "車與馬排在同一直線瞄準敵王。跳開騎士（可選 c5 或跳入 d6 發動雙重將軍！）發動抽將，同時踏入敵后攻擊範圍！",
+        knowledge: "抽將（Discovered Check）：前子移開亮出後方重子將軍，若跳至 d6 更是雙重將軍（Double Check），敵方忙於救王，皇后必失！",
         fen: "4k3/1q1p1p2/8/8/4N3/8/5PPP/4R1K1",
-        from: [4, 4], to: [3, 2]
+        from: [4, 4], to: [3, 2],
+        alternatives: [[2, 3]]
       },
       {
         title: "騎士與車雙重將軍絕殺 (Double Check Mate)",
@@ -2452,7 +2453,7 @@
         desc: `${turn === 'b' ? '輪到黑方走棋反擊！' : ''}${tpl.desc}`,
         knowledge: tpl.knowledge,
         initialBoard: board,
-        solution: { from: [fr, fc], to: [tr, tc] },
+        solution: { from: [fr, fc], to: [tr, tc], alternatives: tpl.alternatives || [] },
         hint: dynamicHint,
         strategicElements: meta.elements,
         strategicDetail: meta.detail,
@@ -2934,8 +2935,12 @@
             sq.classList.add(pieceChar ? 'sq-legal-capture' : 'sq-legal');
           }
 
-          // If user clicked Hint button, pulse the solution target square
-          if (showTargetHint && r === p.solution.to[0] && c === p.solution.to[1]) {
+          // If user clicked Hint button, pulse the solution target square(s)
+          const isHintTarget = showTargetHint && (
+            (r === p.solution.to[0] && c === p.solution.to[1]) ||
+            (p.solution.alternatives && p.solution.alternatives.some(([ar, ac]) => r === ar && c === ac))
+          );
+          if (isHintTarget) {
             sq.classList.add('sq-hint-target');
           }
 
@@ -2982,6 +2987,11 @@
         fromR === p.solution.from[0] && fromC === p.solution.from[1] &&
         r === p.solution.to[0] && c === p.solution.to[1]
       );
+      const isAlternativeSolution = (
+        fromR === p.solution.from[0] && fromC === p.solution.from[1] &&
+        p.solution.alternatives &&
+        p.solution.alternatives.some(([ar, ac]) => r === ar && c === ac)
+      );
       const isAlternativeMateIn1 = p.isMateIn1 && isCheckmate(nextBoard, p.turn === 'w' ? 'b' : 'w');
       const enemy = p.turn === 'w' ? 'b' : 'w';
       const isAlternativeValidCapture = (
@@ -2991,7 +3001,7 @@
         !getAllLegalMoves(nextBoard, enemy).some(m => m.to[0] === r && m.to[1] === c)
       );
 
-      if (isExpectedSolution || isAlternativeMateIn1 || isAlternativeValidCapture) {
+      if (isExpectedSolution || isAlternativeSolution || isAlternativeMateIn1 || isAlternativeValidCapture) {
         // Success!
         puzzleSolved = true;
         showTargetHint = false;
@@ -3010,7 +3020,11 @@
         const feedback = document.getElementById('puzzle-feedback');
         feedback.className = 'feedback-box success';
         feedback.style.display = 'block';
-        feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${p.knowledge}`;
+        let specialNote = '';
+        if (p.id === 14 && r === 2 && c === 3) {
+          specialNote = `<strong>💡 絕妙好棋！跳至 d6 不僅抽吃皇后，更同時構成雙重將軍（Double Check），敵方毫無反抗餘地！</strong><br>`;
+        }
+        feedback.innerHTML = `✅ <strong>太棒了！走法完全正確！</strong><br>${specialNote}${p.knowledge}`;
 
         if (isWoodpeckerMode) {
           handleWoodpeckerSolve();
