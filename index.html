@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0f172a">
@@ -1974,9 +1977,9 @@
     "rating": "基礎 ★★☆☆☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "敵王與邊翼主教同時位於第 7 排！將重車推進第 7 排，將軍敵王並同時鎖定無根主教！",
+    "desc": "重車切入敵方第 7 排次底線 c7 格！橫向將軍敵王，同時威脅邊緣落單黑象！",
     "knowledge": "車之橫排雙擊：當敵王與無根大子處於同一橫排時，重車切入即可製造將軍捉雙！",
-    "fen": "8/b3k1pp/8/8/8/8/5PPP/2R3K1",
+    "fen": "8/b1p3kp/8/8/8/8/1P3PPP/2R3K1",
     "from": [
       7,
       2
@@ -2074,16 +2077,16 @@
     "rating": "進階 ★★★☆☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "敵王與敵后站在同一條大斜線上。移動皇后發動遠程將軍串擊，迫使敵王讓出敵后！",
+    "desc": "皇后長射飛入 g4 將軍穿透黑王，黑王被迫逃開後直接吃下身後 c8 重車！",
     "knowledge": "皇后串擊：在開闊局面中，皇后的斜線串擊往往能一舉奪取對方皇后！",
-    "fen": "6q1/8/4k3/8/8/8/PP3PPP/3Q2K1",
+    "fen": "2r5/p1p2ppp/4k3/8/8/8/PPP2PPP/3Q2K1",
     "from": [
       7,
       3
     ],
     "to": [
-      5,
-      1
+      4,
+      6
     ]
   },
   {
@@ -2134,9 +2137,9 @@
     "rating": "基礎 ★★☆☆☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "敵王與敵車同時站在第 7 橫排。將重車推進第 7 排將軍敵王，串擊後方的重車！",
+    "desc": "重車橫掃第 7 排次底線！直取 h7 將軍，穿透黑王直射身後 b7 重車！",
     "knowledge": "橫排串擊：重車衝上第 7 排不僅能威脅敵王，更能利用橫向射程串擊同排落單大子！",
-    "fen": "8/r3k3/8/8/8/8/5PP1/6KR",
+    "fen": "p7/1r2k3/2p5/8/8/8/1PP2PP1/6KR",
     "from": [
       7,
       7
@@ -3385,23 +3388,23 @@
     "eloBand": "1600+"
   },
   {
-    "title": "升車抽將奪取主動 (Rook Lift Discovered Check)",
+    "title": "主教開線抽將大破防禦 (Bishop Discovered Check Breaks Defense)",
     "category": "閃擊與抽將",
     "themeKey": "fork",
     "catClass": "cat-med",
     "rating": "進階 ★★★☆☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "橫移重車斬獲黑象，同時亮出後方主教斜向抽將！",
+    "desc": "主教閃開切入 g5 強勢牽制，同時亮出身後 e1 重車對黑王發動雷霆抽將！",
     "knowledge": "車開線抽象：利用主教斜線砲台，前線重車橫掃吃子同時發動閃電抽將！",
-    "fen": "4k3/1pp2ppp/8/2b5/8/2R5/1PP2PPP/4B1K1",
+    "fen": "r1bqk2r/ppp2ppp/2n1pn2/8/8/4B3/PPP2PPP/R2QR1K1",
     "from": [
       5,
-      2
+      4
     ],
     "to": [
       3,
-      2
+      6
     ],
     "strategicElements": [
       "space",
@@ -3419,16 +3422,16 @@
     "rating": "進階 ★★★☆☆",
     "turn": "b",
     "isMateIn1": false,
-    "desc": "輪到黑方走棋！黑象閃開吃兵，亮出底線黑車反手抽將！",
+    "desc": "輪到黑方走棋！黑象果斷吃掉 c3 白馬，同時亮出底線 e8 黑車反手抽將白王！",
     "knowledge": "黑方反抽將：利用開線抽將奪回對局主導權，反戈一擊逆轉局勢！",
-    "fen": "4r1k1/1pp2ppp/8/4b3/8/8/1PP2PPP/4K3",
+    "fen": "4r1k1/ppp2ppp/8/4b3/8/2N5/PPP2PPP/R1B1K3",
     "from": [
       3,
       4
     ],
     "to": [
-      6,
-      7
+      5,
+      2
     ],
     "strategicElements": [
       "tempo",
@@ -3439,16 +3442,16 @@
     "eloBand": "1000-1600"
   },
   {
-    "title": "騎士前進開闢殺線 (Knight Clearance Discovered Attack)",
+    "title": "騎士開闢殺線抽將捉后 (Knight Discovered Attack Wins Queen)",
     "category": "閃擊與抽將",
     "themeKey": "fork",
     "catClass": "cat-hard",
     "rating": "進階 ★★★★☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "騎士跳入 c6 將軍，為後方皇后打通直擊敵王的進攻大道！",
+    "desc": "騎士躍入 c6 斬殺黑馬，亮出身後皇后對黑王抽將，同時前線騎士鎖定 a5 黑后！",
     "knowledge": "騰線攻擊：移動前哨子力不僅能斬獲材料，更能徹底釋放後方長程兵器的進攻射線！",
-    "fen": "3k4/1pp2ppp/8/8/3N4/8/1PP2PPP/3Q1K2",
+    "fen": "r1bk1b1r/p4ppp/1pn5/q7/3N4/8/PPP2PPP/RNBQ1RK1",
     "from": [
       4,
       3
@@ -3473,9 +3476,9 @@
     "rating": "基礎 ★★☆☆☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "前線主教移開斬殺黑馬，亮出身後重車對底線黑王發動抽將！",
+    "desc": "前線主教移開斬殺 e4 黑馬，同時亮出身後 d1 重車對底線黑王發動致命抽將！",
     "knowledge": "底線抽將：前線主教移位消滅敵方外圍防守者，底線重砲瞬間掌控戰局！",
-    "fen": "3k4/1pp2ppp/8/4n3/8/3B4/1PP2PPP/3R1K2",
+    "fen": "3k4/1pp2ppp/8/8/4n3/3B4/1PP2PPP/3R1K2",
     "from": [
       5,
       3
@@ -3493,23 +3496,23 @@
     "eloBand": "0-1000"
   },
   {
-    "title": "主教斜向抽將生擒無根車 (Bishop Check Wins Hanging Rook)",
+    "title": "騎士閃擊抽將生擒敵后 (Knight Discovered Check Wins Queen)",
     "category": "閃擊與抽將",
     "themeKey": "fork",
     "catClass": "cat-hard",
     "rating": "進階 ★★★★☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "前線騎士跳開至中心 d5，亮出主教斜線將軍！",
+    "desc": "騎士長驅直入 c6 斬殺黑馬，亮出身後 e1 重車對黑王發動致命抽將，同時前線騎士鎖死 a5 黑后！",
     "knowledge": "閃擊雙管齊下：抽將迫使對手應將，我方前線棋子趁機收割落單大子！",
-    "fen": "4k3/1pp2ppp/8/8/8/2N5/1PP2PPP/B3K3",
+    "fen": "r1b1k2r/p4ppp/1pn5/q3N3/8/8/PPPB1PPP/R2QR1K1",
     "from": [
-      5,
-      2
+      3,
+      4
     ],
     "to": [
-      3,
-      3
+      2,
+      2
     ],
     "strategicElements": [
       "tempo",
@@ -3527,15 +3530,15 @@
     "rating": "名局 ★★★★☆",
     "turn": "w",
     "isMateIn1": false,
-    "desc": "騎士跳入中心要塞 e5，同時釋放底線重車射線對黑方展開衝擊！",
+    "desc": "騎士跳入中心要塞 e6 吃兵，同時釋放底線重車射線對黑王展開致命抽將！",
     "knowledge": "多線開火：前線子力跳躍騰空，為身後兩件重子同時開闢進攻通路，造成對手防線全面崩潰！",
-    "fen": "3k4/1pp2ppp/8/8/8/3N4/1PP2PPP/3R1K2",
+    "fen": "r1bk1b1r/ppp2ppp/4p3/8/3N4/8/PPP2PPP/3R1K2",
     "from": [
-      5,
+      4,
       3
     ],
     "to": [
-      3,
+      2,
       4
     ],
     "strategicElements": [
