@@ -976,6 +976,20 @@
             </button>
           </div>
 
+          <!-- Woodpecker Mode Direct Access Button -->
+          <div class="btn-row" style="margin-top: -4px;">
+            <button onclick="toggleWoodpeckerMode()" id="btn-side-woodpecker" class="btn" style="width: 100%; background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #ffffff; font-weight: 800; border: none; box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4); padding: 9px 12px; cursor: pointer;">
+              🐦 開啟「啄木鳥循環訓練器」(The Woodpecker Method)
+            </button>
+          </div>
+
+          <!-- Direct Link to Study Report Guide -->
+          <div class="btn-row" style="margin-top: -4px;">
+            <button onclick="switchTab('guide')" class="btn btn-secondary" style="width: 100%; border-color: rgba(245, 158, 11, 0.5); color: #fbbf24; font-size: 0.78rem; font-weight: 600;">
+              📖 前往《西洋棋戰術全方位研析報告指南》➔
+            </button>
+          </div>
+
           <div class="knowledge-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <div class="knowledge-title" style="margin-bottom: 0;">戰術幾何與四大戰略解析</div>
@@ -2561,11 +2575,19 @@
       isWoodpeckerMode = !isWoodpeckerMode;
       const panel = document.getElementById('woodpecker-panel');
       const btn = document.getElementById('btn-toggle-woodpecker');
+      const sideBtn = document.getElementById('btn-side-woodpecker');
       if (isWoodpeckerMode) {
-        if (panel) panel.classList.add('active');
+        if (panel) {
+          panel.classList.add('active');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         if (btn) {
           btn.classList.add('active');
           btn.innerText = '🐦 啄木鳥模式：進行中 (點擊退出)';
+        }
+        if (sideBtn) {
+          sideBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+          sideBtn.innerText = '✕ 退出「啄木鳥循環訓練」';
         }
         initWoodpeckerTraining();
       } else {
@@ -2573,6 +2595,10 @@
         if (btn) {
           btn.classList.remove('active');
           btn.innerText = '🐦 開啟啄木鳥循環訓練 (The Woodpecker Method)';
+        }
+        if (sideBtn) {
+          sideBtn.style.background = 'linear-gradient(135deg, #ec4899, #8b5cf6)';
+          sideBtn.innerText = '🐦 開啟「啄木鳥循環訓練器」(The Woodpecker Method)';
         }
         stopWoodpeckerTimer();
       }
